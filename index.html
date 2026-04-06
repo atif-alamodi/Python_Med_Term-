@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PYT103 - البرمجة بالبايثون - دليل تفاعلي شامل</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0a0f1e;color:#e2e8f0;font-family:system-ui,'Segoe UI',sans-serif;line-height:1.8}
+::-webkit-scrollbar{height:5px;width:5px}::-webkit-scrollbar-thumb{background:#334155;border-radius:4px}
+.hdr{background:linear-gradient(135deg,#1a1a3e,#0a0f1e 60%,#0f1a0f);padding:1.6rem;text-align:center;border-bottom:2px solid #2d3a5e}
+.hdr h1{font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,#fbbf24,#fb923c,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr p{color:#94a3b8;font-size:.82rem;margin-top:.3rem}
+.tabs{display:flex;overflow-x:auto;background:#0d1117;border-bottom:2px solid #1f2937;position:sticky;top:0;z-index:100}
+.tab{flex:none;padding:.55rem .7rem;font-size:.65rem;font-weight:700;color:#64748b;background:none;border:none;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:.3s}
+.tab.on{color:#fbbf24;border-bottom-color:#fbbf24;background:rgba(251,191,36,.08)}
+.wrap{max-width:960px;margin:0 auto;padding:1rem}
+.sec{display:none}.sec.on{display:block}
+.card{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:1.3rem;margin-bottom:1rem}
+h2{font-size:1.05rem;font-weight:800;margin-bottom:.8rem}
+h3{font-size:.9rem;font-weight:700;color:#fbbf24;margin:1.2rem 0 .5rem}
+.cb{border-right:4px solid #fbbf24;background:rgba(251,191,36,.04);padding:.75rem;border-radius:0 8px 8px 0;margin:.5rem 0;font-size:.83rem}
+.cb.g{border-right-color:#34d399;background:rgba(52,211,153,.04)}
+.cb.b{border-right-color:#818cf8;background:rgba(129,140,248,.04)}
+.cb.o{border-right-color:#fb923c;background:rgba(251,146,60,.04)}
+.cb.r{border-right-color:#f87171;background:rgba(248,113,113,.04)}
+.lb{font-weight:700;margin-bottom:.3rem;font-size:.88rem}
+.lb.yl{color:#fbbf24}.lb.gr{color:#34d399}.lb.or{color:#fb923c}.lb.pu{color:#818cf8}
+.ez{background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.18);border-radius:10px;padding:.7rem;margin:.5rem 0;font-size:.82rem;line-height:2}
+.ez::before{content:'🧒 تبسيط شديد:';display:block;color:#34d399;font-weight:800;font-size:.8rem;margin-bottom:.3rem}
+.code{background:#000;border-radius:8px;padding:.7rem;font-family:'Courier New',monospace;font-size:.78rem;direction:ltr;text-align:left;overflow-x:auto;margin:.5rem 0;line-height:1.7;color:#e2e8f0;white-space:pre-wrap}
+.code .kw{color:#c084fc}.code .fn{color:#38bdf8}.code .st{color:#34d399}.code .cm{color:#6b7280}.code .nu{color:#fbbf24}.code .op{color:#fb923c}
+.tw{overflow-x:auto;margin:.5rem 0}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{background:rgba(251,191,36,.1);color:#fbbf24;font-weight:700;padding:.45rem;border:1px solid #1f2937}
+td{padding:.38rem .42rem;border:1px solid #1f2937}
+.inter-box{background:#0d1117;border:2px solid #22c55e;border-radius:12px;padding:1.1rem 1rem .9rem;margin:1.1rem 0;position:relative}
+.inter-box::before{content:'🐍 محاكي بايثون — جرّب بنفسك!';position:absolute;top:-11px;right:14px;background:#22c55e;color:#000;font-size:.62rem;font-weight:800;padding:1px 9px;border-radius:4px;white-space:nowrap;z-index:1}
+.inter-box.game::before{content:'🎮 تفاعلي — شارك وجرّب!';background:#ef4444;color:#fff}
+.btn{padding:.35rem .85rem;border-radius:8px;border:none;cursor:pointer;font-size:.78rem;font-weight:700;transition:.2s;font-family:inherit}
+.btn-gr{background:rgba(52,211,153,.18);color:#34d399;border:1px solid rgba(52,211,153,.35)}
+.btn-gr:hover{background:rgba(52,211,153,.35)}
+.btn-yl{background:rgba(251,191,36,.18);color:#fbbf24;border:1px solid rgba(251,191,36,.35)}
+.btn-yl:hover{background:rgba(251,191,36,.35)}
+.btn-re{background:rgba(248,113,113,.18);color:#f87171;border:1px solid rgba(248,113,113,.35)}
+.btn-re:hover{background:rgba(248,113,113,.35)}
+.btn-pu{background:rgba(129,140,248,.18);color:#818cf8;border:1px solid rgba(129,140,248,.35)}
+.btn-pu:hover{background:rgba(129,140,248,.35)}
+.btn-row{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
+.py-editor{background:#1e1e1e;border-radius:8px;overflow:hidden;margin:.5rem 0}
+.py-bar{background:#2d2d2d;padding:.3rem .6rem;display:flex;justify-content:space-between;align-items:center}
+.py-bar span{color:#34d399;font-size:.7rem;font-weight:700}
+.py-ta{width:100%;background:#1e1e1e;color:#d4d4d4;font-family:'Courier New',monospace;font-size:.78rem;border:none;padding:.6rem;min-height:100px;resize:vertical;outline:none;direction:ltr;text-align:left;line-height:1.6}
+.py-out{background:#000;color:#e2e8f0;font-family:'Courier New',monospace;font-size:.78rem;padding:.5rem;min-height:40px;max-height:200px;overflow-y:auto;border-top:1px solid #333;direction:ltr;text-align:left;white-space:pre-wrap}
+.py-out .err{color:#f87171}.py-out .ok{color:#34d399}
+.qc{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:.85rem;margin-bottom:.7rem}
+.qc h4{color:#fbbf24;font-weight:700;font-size:.82rem;margin-bottom:.45rem}
+.qo{padding:.45rem .65rem;border:1px solid #1f2937;border-radius:8px;margin-bottom:.28rem;font-size:.8rem;cursor:pointer;transition:.2s;direction:ltr;text-align:left}
+.qo.ar{direction:rtl;text-align:right}
+.qo:hover:not(.d){border-color:#fbbf24;background:rgba(251,191,36,.05)}
+.qo.ok{border-color:#22c55e;background:rgba(34,197,94,.08);color:#34d399}
+.qo.no{border-color:#ef4444;background:rgba(239,68,68,.08);color:#fca5a5}
+.qo.d{cursor:default}
+.qe{margin-top:.35rem;padding:.45rem;border-radius:6px;font-size:.76rem;display:none}
+.qe.s{display:block}
+.qe.ok{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);color:#34d399}
+.qe.no{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);color:#fca5a5}
+.sb{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:.7rem;text-align:center;margin-bottom:.7rem}
+.sb .sn{font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,#fbbf24,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.rb{display:block;margin:.4rem auto;padding:.35rem 1.2rem;background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.25);border-radius:8px;cursor:pointer;font-weight:700;font-size:.78rem}
+.hl{color:#fbbf24;font-weight:700}
+.hl2{color:#fb923c;font-weight:700}
+.hl3{color:#34d399;font-weight:700}
+.badge{display:inline-block;padding:.15rem .4rem;border-radius:6px;font-size:.72rem;font-weight:700;margin:.1rem}
+.badge.yl{background:rgba(251,191,36,.15);color:#fbbf24}
+.badge.gr{background:rgba(52,211,153,.15);color:#34d399}
+.badge.or{background:rgba(251,146,60,.15);color:#fb923c}
+.badge.re{background:rgba(248,113,113,.15);color:#f87171}
+.tip{border:1px dashed rgba(251,191,36,.4);background:rgba(251,191,36,.04);border-radius:8px;padding:.55rem;margin:.5rem 0;font-size:.82rem}
+.warn{border-right:4px solid #f87171;background:rgba(248,113,113,.05);padding:.75rem;border-radius:0 8px 8px 0;margin:.5rem 0;font-size:.82rem}
+.diagram{background:#0d1117;border:1px solid #1f2937;border-radius:12px;padding:.6rem;margin:.9rem 0;text-align:center;overflow-x:auto}
+.progress-bar{background:#1f2937;border-radius:8px;height:8px;margin:.3rem 0;overflow:hidden}
+.progress-fill{background:linear-gradient(90deg,#fbbf24,#34d399);height:100%;border-radius:8px;transition:width .5s}
+</style>
+</head>
+<body>
+<div class="hdr">
+<h1>🐍 البرمجة بالبايثون PYT103 — دليل تفاعلي شامل</h1>
+<p>4 مواضيع | محاكيات بايثون تفاعلية | شرح مبسّط جداً | اختبار ذاتي 80 سؤال</p>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap" id="content"></div>
+
+<script>
+const tabs=[
+{id:'t1',icon:'🏠',label:'1: مقدمة بايثون'},
+{id:'t2',icon:'📦',label:'2: المتغيرات'},
+{id:'t3',icon:'🔢',label:'3: العوامل'},
+{id:'t4',icon:'📋',label:'4: القوائم والصفوف'},
+{id:'t5',icon:'🖨️',label:'5: print و input'},
+{id:'t6',icon:'🐛',label:'6: الأخطاء'},
+{id:'t7',icon:'💻',label:'محاكي بايثون'},
+{id:'quiz',icon:'✅',label:'اختبار ذاتي (80)'}
+];
+let cur='t1';
+const tabsEl=document.getElementById('tabs');
+tabs.forEach(t=>{
+const b=document.createElement('button');
+b.className='tab'+(t.id===cur?' on':'');
+b.textContent=t.icon+' '+t.label;
+b.onclick=()=>{cur=t.id;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');render();window.scrollTo({top:0,behavior:'smooth'})};
+tabsEl.appendChild(b);
+});
+const S={};
+
+// ===== PYTHON MINI INTERPRETER =====
+function pyRun(editorId,outputId,inputsObj){
+const code=document.getElementById(editorId).value;
+const outEl=document.getElementById(outputId);
+outEl.innerHTML='';
+let output='';
+const inputs=inputsObj||{};
+let inputIdx=0;
+const inputVals=Object.values(inputs);
+
+// Simple Python interpreter subset
+try{
+let vars={};
+let lines=code.split('\n');
+let i=0;
+function getVal(expr){
+  expr=expr.trim();
+  if(expr==='')return '';
+  // Handle f-strings
+  if(expr.match(/^f['"]/)){
+    let q=expr[1];let s=expr.slice(2,-1);
+    return s.replace(/\{([^}]+)\}/g,(_,e)=>evalExpr(e));
+  }
+  // string
+  if((expr[0]==='"'&&expr[expr.length-1]==='"')||(expr[0]==="'"&&expr[expr.length-1]==="'"))return expr.slice(1,-1);
+  // number
+  if(!isNaN(expr)&&expr!=='')return Number(expr);
+  // bool
+  if(expr==='True')return true;
+  if(expr==='False')return false;
+  // None
+  if(expr==='None')return null;
+  // list literal
+  if(expr[0]==='['&&expr[expr.length-1]===']'){
+    if(expr==='[]')return [];
+    let items=smartSplit(expr.slice(1,-1),',');
+    return items.map(x=>getVal(x.trim()));
+  }
+  // tuple literal
+  if(expr[0]==='('&&expr[expr.length-1]===')'){
+    let inner=expr.slice(1,-1).trim();
+    if(inner==='')return [];
+    let items=smartSplit(inner,',');
+    return items.map(x=>getVal(x.trim()));
+  }
+  // variable
+  if(vars.hasOwnProperty(expr))return vars[expr];
+  // function calls & expressions
+  return evalExpr(expr);
+}
+
+function smartSplit(s,delim){
+  let parts=[],depth=0,cur='',inStr=false,strCh='';
+  for(let c of s){
+    if(inStr){cur+=c;if(c===strCh)inStr=false;continue;}
+    if(c==='"'||c==="'"){inStr=true;strCh=c;cur+=c;continue;}
+    if(c==='('||c==='['||c==='{')depth++;
+    if(c===')'||c===']'||c==='}')depth--;
+    if(c===delim&&depth===0){parts.push(cur);cur='';}
+    else cur+=c;
+  }
+  if(cur.trim())parts.push(cur);
+  return parts;
+}
+
+function evalExpr(expr){
+  expr=expr.trim();
+  if(expr==='')return '';
+
+  // f-string
+  if(expr.match(/^f['"]/)){
+    let q=expr[1];let s=expr.slice(2,-1);
+    return s.replace(/\{([^}:]+)(?::([^}]*))?\}/g,(_,e,fmt)=>{
+      let v=evalExpr(e);
+      if(fmt&&fmt.includes('f')){ let d=parseInt(fmt.replace('.','').replace('f',''))||2; return Number(v).toFixed(d);}
+      if(fmt&&fmt.includes('d'))return String(Math.floor(Number(v))).padStart(parseInt(fmt)||1,'0');
+      return v;
+    });
+  }
+
+  // string literal
+  if((expr[0]==='"'&&expr[expr.length-1]==='"')||(expr[0]==="'"&&expr[expr.length-1]==="'"))return expr.slice(1,-1);
+  if(!isNaN(expr)&&expr!=='')return Number(expr);
+  if(expr==='True')return true;if(expr==='False')return false;if(expr==='None')return null;
+
+  // list literal
+  if(expr[0]==='['&&expr[expr.length-1]===']'){
+    if(expr==='[]')return [];
+    return smartSplit(expr.slice(1,-1),',').map(x=>evalExpr(x.trim()));
+  }
+
+  // not
+  if(expr.startsWith('not ')){return !evalExpr(expr.slice(4));}
+
+  // and/or
+  if(expr.includes(' and ')){let p=expr.split(' and ');return evalExpr(p[0])&&evalExpr(p.slice(1).join(' and '));}
+  if(expr.includes(' or ')){let p=expr.split(' or ');return evalExpr(p[0])||evalExpr(p.slice(1).join(' or '));}
+
+  // comparisons
+  for(let op of ['==','!=','>=','<=','>','<']){
+    let idx=expr.indexOf(op);
+    if(idx>0&&expr[idx-1]!=='!'&&expr[idx-1]!=='>'&&expr[idx-1]!=='<'){
+      let l=evalExpr(expr.slice(0,idx)),r=evalExpr(expr.slice(idx+op.length));
+      if(op==='==')return l==r;if(op==='!=')return l!=r;
+      if(op==='>=')return l>=r;if(op==='<=')return l<=r;
+      if(op==='>')return l>r;if(op==='<')return l<r;
+    }
+  }
+
+  // in operator
+  if(expr.includes(' in ')){
+    let p=expr.split(' in ');
+    let val=evalExpr(p[0]),container=evalExpr(p.slice(1).join(' in '));
+    if(Array.isArray(container))return container.includes(val);
+    if(typeof container==='string')return container.includes(val);
+    return false;
+  }
+
+  // +- (not inside strings)
+  let depth=0,lastPlus=-1,lastMinus=-1;
+  for(let j=expr.length-1;j>=0;j--){
+    let c=expr[j];
+    if(c===')'||c===']')depth++;if(c==='('||c==='[')depth--;
+    if(depth===0&&c==='+'&&j>0){lastPlus=j;break;}
+    if(depth===0&&c==='-'&&j>0&&expr[j-1]!==' '&&!'+-*/%('.includes(expr[j-1])){lastMinus=j;break;}
+  }
+  let splitAt=Math.max(lastPlus,lastMinus);
+  if(splitAt>0){
+    let l=evalExpr(expr.slice(0,splitAt)),r=evalExpr(expr.slice(splitAt+1));
+    if(expr[splitAt]==='+'){
+      if(typeof l==='string'||typeof r==='string')return String(l)+String(r);
+      return Number(l)+Number(r);
+    }
+    return Number(l)-Number(r);
+  }
+
+  // * / // % **
+  depth=0;
+  for(let j=expr.length-1;j>=0;j--){
+    let c=expr[j];
+    if(c===')'||c===']')depth++;if(c==='('||c==='[')depth--;
+    if(depth===0){
+      if(c==='*'&&j>0&&expr[j-1]!=='*'&&(j+1>=expr.length||expr[j+1]!=='*')){
+        let l=evalExpr(expr.slice(0,j)),r=evalExpr(expr.slice(j+1));
+        if(typeof l==='string')return l.repeat(Number(r));
+        if(typeof r==='string')return r.repeat(Number(l));
+        return Number(l)*Number(r);
+      }
+      if(c==='/'&&j>0&&expr[j-1]!=='/'&&(j+1>=expr.length||expr[j+1]!=='/')){
+        return Number(evalExpr(expr.slice(0,j)))/Number(evalExpr(expr.slice(j+1)));
+      }
+      if(c==='/'&&j>0&&expr[j-1]==='/'){
+        return Math.floor(Number(evalExpr(expr.slice(0,j-1)))/Number(evalExpr(expr.slice(j+1))));
+      }
+      if(c==='%'&&j>0){
+        return Number(evalExpr(expr.slice(0,j)))%Number(evalExpr(expr.slice(j+1)));
+      }
+    }
+  }
+  // **
+  if(expr.includes('**')){
+    let idx=expr.lastIndexOf('**');
+    return Math.pow(Number(evalExpr(expr.slice(0,idx))),Number(evalExpr(expr.slice(idx+2))));
+  }
+
+  // parens
+  if(expr[0]==='('&&expr[expr.length-1]===')'){return evalExpr(expr.slice(1,-1));}
+
+  // function calls
+  let fnMatch=expr.match(/^(\w+)\((.*)?\)$/s);
+  if(fnMatch){
+    let fn=fnMatch[1],argsStr=fnMatch[2]||'';
+    let args=argsStr?smartSplit(argsStr,',').map(a=>a.trim()):[];
+
+    if(fn==='print'){
+      let sep=' ',end='\n';
+      let printArgs=[];
+      for(let a of args){
+        if(a.startsWith('sep=')){sep=evalExpr(a.slice(4));}
+        else if(a.startsWith('end=')){end=evalExpr(a.slice(4));}
+        else printArgs.push(evalExpr(a));
+      }
+      output+=printArgs.map(x=>x===null?'None':x===true?'True':x===false?'False':Array.isArray(x)?JSON.stringify(x).replace(/"/g,"'"):String(x)).join(sep)+end;
+      return;
+    }
+    if(fn==='input'){
+      let prompt=args.length?evalExpr(args[0]):'';
+      output+=prompt;
+      if(inputIdx<inputVals.length)return String(inputVals[inputIdx++]);
+      return '';
+    }
+    if(fn==='int')return parseInt(evalExpr(args[0]));
+    if(fn==='float')return parseFloat(evalExpr(args[0]));
+    if(fn==='str')return String(evalExpr(args[0]));
+    if(fn==='type'){
+      let v=evalExpr(args[0]);
+      if(typeof v==='number'&&Number.isInteger(v))return "<class 'int'>";
+      if(typeof v==='number')return "<class 'float'>";
+      if(typeof v==='string')return "<class 'str'>";
+      if(typeof v==='boolean')return "<class 'bool'>";
+      if(Array.isArray(v))return "<class 'list'>";
+      return "&lt;class 'NoneType'&gt;";
+    }
+    if(fn==='len'){let v=evalExpr(args[0]);return Array.isArray(v)?v.length:String(v).length;}
+    if(fn==='max'){let v=evalExpr(args[0]);return Array.isArray(v)?Math.max(...v):Math.max(...args.map(a=>Number(evalExpr(a))));}
+    if(fn==='min'){let v=evalExpr(args[0]);return Array.isArray(v)?Math.min(...v):Math.min(...args.map(a=>Number(evalExpr(a))));}
+    if(fn==='sum'){let v=evalExpr(args[0]);return Array.isArray(v)?v.reduce((a,b)=>a+b,0):0;}
+    if(fn==='abs')return Math.abs(Number(evalExpr(args[0])));
+    if(fn==='round'){let v=Number(evalExpr(args[0])),d=args[1]?Number(evalExpr(args[1])):0;return Number(v.toFixed(d));}
+    if(fn==='range'){
+      let a=args.map(x=>Number(evalExpr(x)));
+      let start=0,stop,step=1;
+      if(a.length===1)stop=a[0];
+      else if(a.length===2){start=a[0];stop=a[1];}
+      else{start=a[0];stop=a[1];step=a[2];}
+      let r=[];for(let x=start;step>0?x<stop:x>stop;x+=step)r.push(x);
+      return r;
+    }
+    if(fn==='list'){if(args.length===0)return [];return Array.from(evalExpr(args[0]));}
+    if(fn==='tuple'){if(args.length===0)return [];return Array.from(evalExpr(args[0]));}
+    if(fn==='sorted'){let v=[...evalExpr(args[0])];v.sort((a,b)=>a>b?1:a<b?-1:0);return v;}
+    if(fn==='bool'){let v=evalExpr(args[0]);return !!v;}
+    // user-defined function
+    if(vars['__fn_'+fn]){
+      let fdef=vars['__fn_'+fn];
+      let oldVars={...vars};
+      for(let pi=0;pi<fdef.params.length;pi++){vars[fdef.params[pi]]=evalExpr(args[pi]);}
+      let ret=execBlock(fdef.body,0);
+      vars=oldVars;
+      return ret;
+    }
+  }
+
+  // method calls: obj.method(args)
+  let mMatch=expr.match(/^(.+?)\.(\w+)\((.*)\)$/s);
+  if(mMatch){
+    let obj=evalExpr(mMatch[1]),method=mMatch[2],argsStr=mMatch[3];
+    let args=argsStr?smartSplit(argsStr,',').map(a=>evalExpr(a.trim())):[];
+    if(Array.isArray(obj)){
+      if(method==='append'){obj.push(args[0]);return;}
+      if(method==='extend'){obj.push(...args[0]);return;}
+      if(method==='pop'){return args.length?obj.splice(args[0],1)[0]:obj.pop();}
+      if(method==='remove'){let idx=obj.indexOf(args[0]);if(idx>-1)obj.splice(idx,1);return;}
+      if(method==='sort'){obj.sort((a,b)=>a>b?1:a<b?-1:0);return;}
+      if(method==='reverse'){obj.reverse();return;}
+      if(method==='copy'){return [...obj];}
+      if(method==='index'){return obj.indexOf(args[0]);}
+      if(method==='count'){return obj.filter(x=>x===args[0]).length;}
+      if(method==='insert'){obj.splice(args[0],0,args[1]);return;}
+    }
+    if(typeof obj==='string'){
+      if(method==='split'){return args.length?obj.split(args[0]):obj.split(/\s+/);}
+      if(method==='join'){return args[0].join(obj);}
+      if(method==='upper')return obj.toUpperCase();
+      if(method==='lower')return obj.toLowerCase();
+      if(method==='strip'||method==='trim')return obj.trim();
+      if(method==='replace')return obj.replaceAll(args[0],args[1]);
+      if(method==='startswith')return obj.startsWith(args[0]);
+      if(method==='endswith')return obj.endsWith(args[0]);
+      if(method==='find')return obj.indexOf(args[0]);
+      if(method==='count')return obj.split(args[0]).length-1;
+    }
+  }
+
+  // indexing: var[idx] or var[start:end]
+  let idxMatch=expr.match(/^(.+?)\[(.+)\]$/);
+  if(idxMatch){
+    let obj=evalExpr(idxMatch[1]),idx=idxMatch[2];
+    if(idx.includes(':')){
+      let parts=idx.split(':');
+      let start=parts[0]?Number(evalExpr(parts[0])):0;
+      let end=parts[1]?Number(evalExpr(parts[1])):undefined;
+      if(Array.isArray(obj))return obj.slice(start,end);
+      return String(obj).slice(start,end);
+    }
+    let i=Number(evalExpr(idx));
+    if(i<0)i=Array.isArray(obj)?obj.length+i:String(obj).length+i;
+    return Array.isArray(obj)?obj[i]:String(obj)[i];
+  }
+
+  // variable
+  if(vars.hasOwnProperty(expr))return vars[expr];
+  // negative number
+  if(expr[0]==='-'&&!isNaN(expr.slice(1)))return Number(expr);
+
+  throw new Error("NameError: name '"+expr+"' is not defined");
+}
+
+function execBlock(lines,startI){
+  let i=startI;
+  while(i<lines.length){
+    let line=lines[i].trim();
+    if(line===''||line.startsWith('#')){i++;continue;}
+
+    // def
+    if(line.startsWith('def ')){
+      let dm=line.match(/def\s+(\w+)\(([^)]*)\):/);
+      if(dm){
+        let fname=dm[1],params=dm[2]?dm[2].split(',').map(p=>p.trim()):[];
+        let body=[];i++;
+        while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
+          body.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
+        }
+        vars['__fn_'+fname]={params,body};continue;
+      }
+    }
+
+    // return
+    if(line.startsWith('return ')){return evalExpr(line.slice(7));}
+    if(line==='return')return null;
+
+    // if/elif/else
+    if(line.startsWith('if ')||line.startsWith('elif ')){
+      let cond=line.replace(/^(?:el)?if\s+/,'').replace(/:$/,'');
+      let condVal=evalExpr(cond);
+      i++;
+      let block=[];
+      while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
+        if(lines[i].trim()!=='')block.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
+      }
+      if(condVal){
+        let ret=execBlock(block,0);
+        // skip remaining elif/else
+        while(i<lines.length&&(lines[i].trim().startsWith('elif ')||lines[i].trim().startsWith('else:'))){
+          i++;while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()===''))i++;
+        }
+        if(ret!==undefined)return ret;
+      } else {
+        // check next elif/else
+        if(i<lines.length&&lines[i].trim().startsWith('elif ')){continue;}
+        if(i<lines.length&&lines[i].trim()==='else:'){
+          i++;let block2=[];
+          while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
+            if(lines[i].trim()!=='')block2.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
+          }
+          let ret=execBlock(block2,0);
+          if(ret!==undefined)return ret;
+        }
+      }
+      continue;
+    }
+    if(line==='else:'){i++;while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()===''))i++;continue;}
+
+    // for loop
+    if(line.startsWith('for ')){
+      let fm=line.match(/for\s+(.+)\s+in\s+(.+):/);
+      if(fm){
+        let varName=fm[1].trim(),iterExpr=fm[2].trim();
+        i++;let block=[];
+        while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
+          if(lines[i].trim()!=='')block.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
+        }
+        let iterable=evalExpr(iterExpr);
+        if(Array.isArray(iterable)){
+          for(let item of iterable){
+            if(varName.includes(',')){
+              let names=varName.split(',').map(n=>n.trim());
+              if(Array.isArray(item)){for(let ni=0;ni<names.length;ni++)vars[names[ni]]=item[ni];}
+            }else{vars[varName]=item;}
+            execBlock(block,0);
+          }
+        }
+      }
+      continue;
+    }
+
+    // while loop
+    if(line.startsWith('while ')){
+      let cond=line.replace(/^while\s+/,'').replace(/:$/,'');
+      i++;let block=[];
+      while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
+        if(lines[i].trim()!=='')block.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
+      }
+      let limit=1000,count=0;
+      while(evalExpr(cond)&&count<limit){execBlock(block,0);count++;}
+      continue;
+    }
+
+    // del
+    if(line.startsWith('del ')){
+      let target=line.slice(4).trim();
+      let dm=target.match(/^(.+)\[(.+)\]$/);
+      if(dm){let obj=evalExpr(dm[1]),idx=Number(evalExpr(dm[2]));if(Array.isArray(obj))obj.splice(idx,1);}
+      else delete vars[target];
+      i++;continue;
+    }
+
+    // assignment (including augmented)
+    let augOps=['+=','-=','*=','//=','/=','%=','**='];
+    let foundAug=false;
+    for(let ao of augOps){
+      if(line.includes(ao)){
+        let p=line.split(ao);let vn=p[0].trim(),val=evalExpr(p.slice(1).join(ao).trim());
+        let cur=vars[vn];
+        if(ao==='+='){if(typeof cur==='string')vars[vn]=cur+val;else vars[vn]=Number(cur)+Number(val);}
+        else if(ao==='-=')vars[vn]=Number(cur)-Number(val);
+        else if(ao==='*=')vars[vn]=Number(cur)*Number(val);
+        else if(ao==='//=')vars[vn]=Math.floor(Number(cur)/Number(val));
+        else if(ao==='/=')vars[vn]=Number(cur)/Number(val);
+        else if(ao==='%=')vars[vn]=Number(cur)%Number(val);
+        else if(ao==='**=')vars[vn]=Math.pow(Number(cur),Number(val));
+        foundAug=true;break;
+      }
+    }
+    if(foundAug){i++;continue;}
+
+    // multiple assignment with semicolons
+    if(line.includes(';')){
+      let stmts=line.split(';');
+      for(let stmt of stmts){
+        stmt=stmt.trim();
+        if(stmt.includes('=')){let p=stmt.split('=');vars[p[0].trim()]=evalExpr(p.slice(1).join('=').trim());}
+        else evalExpr(stmt);
+      }
+      i++;continue;
+    }
+
+    // simple assignment or indexing assignment
+    if(line.includes('=')&&!line.includes('==')){
+      let eqIdx=line.indexOf('=');
+      if(eqIdx>0&&line[eqIdx-1]!=='!'&&line[eqIdx-1]!=='>'&&line[eqIdx-1]!=='<'&&line[eqIdx+1]!=='='){
+        let lhs=line.slice(0,eqIdx).trim(),rhs=line.slice(eqIdx+1).trim();
+        // tuple unpacking
+        if(lhs.includes(',')){
+          let names=lhs.split(',').map(n=>n.trim());
+          let val=evalExpr(rhs);
+          if(Array.isArray(val)){for(let ni=0;ni<names.length;ni++)vars[names[ni]]=val[ni];}
+        }
+        // indexing assignment
+        else if(lhs.match(/\[.+\]$/)){
+          let im=lhs.match(/^(.+)\[(.+)\]$/);
+          let obj=evalExpr(im[1]),idx=Number(evalExpr(im[2])),val=evalExpr(rhs);
+          if(Array.isArray(obj)){if(idx<0)idx=obj.length+idx;obj[idx]=val;}
+        }
+        else vars[lhs]=evalExpr(rhs);
+        i++;continue;
+      }
+    }
+
+    // expression statement
+    evalExpr(line);
+    i++;
+  }
+}
+
+execBlock(lines,0);
+outEl.innerHTML='<span class="ok">'+output.replace(/</g,'&lt;')+'</span>';
+}catch(e){
+  outEl.innerHTML='<span class="ok">'+output.replace(/</g,'&lt;')+'</span><span class="err">'+e.message.replace(/</g,'&lt;')+'</span>';
+}
+}
+
+function makePyEditor(id,code,height){
+height=height||120;
+return `<div class="py-editor"><div class="py-bar"><span>🐍 Python Editor</span><button class="btn btn-gr" onclick="pyRun('ed_${id}','out_${id}')">▶ تشغيل</button></div><textarea id="ed_${id}" class="py-ta" style="min-height:${height}px">${code}</textarea><div id="out_${id}" class="py-out" style="color:#94a3b8">اضغط "تشغيل" لرؤية النتيجة</div></div>`;
+}
+
+function makePyEditorWithInputs(id,code,inputs,height){
+height=height||120;
+let inputFields='';
+let inputNames=Object.keys(inputs);
+for(let name of inputNames){
+  inputFields+=`<div style="margin:.3rem 0;display:flex;align-items:center;gap:.4rem;font-size:.78rem"><label style="color:#fbbf24;min-width:100px">${inputs[name]}:</label><input id="inp_${id}_${name}" class="py-ta" style="min-height:auto;padding:.3rem;border:1px solid #333;border-radius:4px;flex:1" value=""></div>`;
+}
+return `<div class="py-editor"><div class="py-bar"><span>🐍 Python Editor (مع إدخال)</span><button class="btn btn-gr" onclick="runWithInputs('${id}',${JSON.stringify(inputNames)})">▶ تشغيل</button></div>${inputFields}<textarea id="ed_${id}" class="py-ta" style="min-height:${height}px">${code}</textarea><div id="out_${id}" class="py-out" style="color:#94a3b8">أدخل القيم ثم اضغط "تشغيل"</div></div>`;
+}
+
+function runWithInputs(id,inputNames){
+let inputs={};
+for(let name of inputNames){
+  inputs[name]=document.getElementById('inp_'+id+'_'+name).value;
+}
+pyRun('ed_'+id,'out_'+id,inputs);
+}
+
+
+// ===== TAB 1: مقدمة في بايثون =====
+S.t1=`<div class="card">
+<h2 style="color:#fbbf24">🏠 ما هي البرمجة؟ وما هي بايثون؟</h2>
+
+<div class="cb"><div class="lb yl">ما هي البرمجة؟</div>
+البرمجة هي أنك <span class="hl">تكتب تعليمات للحاسب</span> خطوة بخطوة ليقوم بمهمة معينة. مثل وصفة الطبخ: تكتب الخطوات والحاسب ينفذها بالترتيب.
+</div>
+
+<div class="ez">تخيل أنك تعلّم طفل صغير كيف يعمل شاي:<br>
+1️⃣ سخّن الماء<br>
+2️⃣ ضع كيس الشاي في الكوب<br>
+3️⃣ صب الماء الساخن<br>
+4️⃣ انتظر دقيقتين<br>
+هذا بالضبط ما تفعله البرمجة! تكتب خطوات واضحة جداً والحاسب ينفذها واحدة واحدة.</div>
+
+<h3>🐍 ما هي بايثون؟</h3>
+<div class="cb g"><div class="lb gr">لغة بايثون Python</div>
+لغة برمجة <span class="hl3">سهلة جداً</span> اخترعها <b>جايدو فان روسم</b> عام 1991 في هولندا. سمّاها "بايثون" بسبب إعجابه بفرقة كوميدية بريطانية.<br><br>
+<b>لماذا بايثون؟</b><br>
+• أبسط لغة من حيث القواعد (أسهل من Java و C++)<br>
+• كتابة البرامج تحتاج أسطر أقل<br>
+• تعمل على كل الأنظمة (ويندوز، ماك، لينكس)<br>
+• تستخدمها شركات مثل: Google, NASA, Disney, YouTube<br>
+• مثالية للذكاء الاصطناعي وتحليل البيانات
+</div>
+
+<div class="ez">بايثون مثل اللغة العربية الفصحى البسيطة: كل واحد يفهمها! بينما لغات أخرى مثل لغة قبيلة صعبة لا يفهمها إلا أهلها.</div>
+
+<h3>💻 مكونات الحاسب الأساسية</h3>
+<div class="tw"><table>
+<tr><th>المكون</th><th>الوظيفة</th><th>مثال من الحياة</th></tr>
+<tr><td><span class="hl">الإدخال Input</span></td><td>استقبال البيانات (لوحة مفاتيح، فأرة)</td><td>مثل أذنك التي تسمع</td></tr>
+<tr><td><span class="hl">المعالج CPU</span></td><td>ينفذ التعليمات (مليارات المرات في الثانية)</td><td>مثل عقلك الذي يفكر</td></tr>
+<tr><td><span class="hl">الذاكرة RAM</span></td><td>تخزين مؤقت سريع (يمسح عند إطفاء الجهاز)</td><td>مثل السبورة: تكتب وتمسح</td></tr>
+<tr><td><span class="hl">التخزين Storage</span></td><td>تخزين دائم (الملفات تبقى)</td><td>مثل الدفتر: يحفظ للأبد</td></tr>
+<tr><td><span class="hl">الإخراج Output</span></td><td>عرض النتائج (شاشة، سماعة)</td><td>مثل فمك الذي يتكلم</td></tr>
+</table></div>
+
+<h3>🔧 المفسّر والمترجم</h3>
+<div class="cb b"><div class="lb pu">المفسّر Interpreter (بايثون تستخدم هذا)</div>
+يقرأ الكود <span class="hl">سطراً بسطر</span> وينفذه فوراً. مثل المترجم الفوري الذي يترجم كل جملة مباشرة.<br>
+<b>ميزة:</b> تشوف النتيجة فوراً ⚡
+</div>
+<div class="cb o"><div class="lb or">المترجم Compiler (لغات أخرى مثل C++)</div>
+يترجم <span class="hl2">البرنامج كاملاً</span> إلى لغة الآلة ثم ينفذه. مثل من يترجم كتاب كامل ثم تقرأه.
+</div>
+
+<h3>📝 أول برنامج: Hello World!</h3>
+<div class="cb g"><div class="lb gr">دالة print() - الطباعة على الشاشة</div>
+<code>print()</code> هي أمر بايثون لعرض نص أو رقم على الشاشة.<br>
+الأمر يبدأ بكلمة print ثم قوسين () وبداخلهم النص بين علامات تنصيص " " أو ' '
+</div>
+
+${makePyEditor('hello','print("Hello, World!")\nprint("مرحباً بالعالم!")\nprint("اسمي عاطف")\nprint(2024)',100)}
+
+<h3>📌 قواعد مهمة</h3>
+<div class="cb r"><div class="lb" style="color:#f87171">⚠️ بايثون حساسة لحالة الأحرف!</div>
+<code>Print</code> ≠ <code>print</code> — يجب كتابتها بحروف صغيرة<br>
+<code>Name</code> ≠ <code>name</code> — أسماء مختلفة تماماً!
+</div>
+<div class="cb"><div class="lb yl">التعليقات Comments</div>
+نستخدم # لكتابة ملاحظات. بايثون تتجاهل كل ما بعد #
+</div>
+
+${makePyEditor('comments','# هذا تعليق - بايثون تتجاهله\nprint("سطر 1")  # تعليق جانبي\n# print("هذا لن يظهر")\nprint("سطر 2")',80)}
+
+<h3>🖥️ كيف أشغّل بايثون؟</h3>
+<div class="cb g"><div class="lb gr">3 طرق سهلة:</div>
+1️⃣ <b>Google Colab</b> (الأسهل): افتح colab.research.google.com واكتب كودك مباشرة<br>
+2️⃣ <b>IDLE</b>: حمّل بايثون من python.org وافتح IDLE<br>
+3️⃣ <b>الطرفية Terminal</b>: اكتب python3 في سطر الأوامر
+</div>
+
+<h3>🧱 المكونات الأساسية لأي برنامج</h3>
+<div class="tw"><table>
+<tr><th>المكون</th><th>الشرح</th><th>مثال</th></tr>
+<tr><td><span class="badge yl">التسلسل</span></td><td>الأوامر تنفذ بالترتيب: سطر 1 ثم 2 ثم 3</td><td>print("أ")  ثم  print("ب")</td></tr>
+<tr><td><span class="badge gr">الشرط</span></td><td>إذا تحقق شرط نفذ شيء وإلا نفذ شيء آخر</td><td>if و else</td></tr>
+<tr><td><span class="badge or">التكرار</span></td><td>كرر تعليمات عدة مرات</td><td>for و while</td></tr>
+<tr><td><span class="badge re">الإدخال/الإخراج</span></td><td>اقرأ من المستخدم واطبع النتيجة</td><td>input() و print()</td></tr>
+<tr><td><span class="badge yl">الدوال</span></td><td>تجميع تعليمات في كتلة قابلة لإعادة الاستخدام</td><td>def</td></tr>
+</table></div>
+</div>`;
+
+
+// ===== TAB 2: المتغيرات وأنواع البيانات =====
+S.t2=`<div class="card">
+<h2 style="color:#fbbf24">📦 المتغيرات وأنواع البيانات</h2>
+
+<div class="cb"><div class="lb yl">ما هو المتغير؟</div>
+المتغير هو <span class="hl">صندوق في الذاكرة</span> نخزن فيه قيمة ونعطيه اسماً. مثلاً: <code>age = 25</code> يعني "خزّن الرقم 25 في صندوق اسمه age"
+</div>
+
+<div class="ez">المتغير مثل <b>ظرف بريد</b>: تكتب اسم عليه (age) وتضع بداخله شيء (25). لاحقاً تقدر تفتح الظرف وتغير المحتوى! لكن الاسم يبقى نفسه.</div>
+
+<h3>✏️ طريقة إنشاء المتغيرات</h3>
+<div class="code">name = "أحمد"       <span class="cm"># متغير نصي</span>
+age = 25             <span class="cm"># متغير عدد صحيح</span>
+height = 1.75        <span class="cm"># متغير عدد عشري</span>
+is_student = True    <span class="cm"># متغير منطقي</span></div>
+
+<div class="tip">💡 <b>علامة = في بايثون تعني "خزّن" وليس "يساوي"!</b> يعني age = 25 معناها: ضع 25 في المتغير age</div>
+
+${makePyEditor('vars1','message = "مرحبا"\ncount = 42\npi = 3.14\nprint(message)\nprint(count)\nprint(pi)',100)}
+
+<h3>📏 قواعد تسمية المتغيرات</h3>
+<div class="tw"><table>
+<tr><th>القاعدة</th><th>✅ صحيح</th><th>❌ خطأ</th></tr>
+<tr><td>يبدأ بحرف أو _</td><td>my_name, _secret</td><td>2name (يبدأ برقم!)</td></tr>
+<tr><td>يحتوي حروف وأرقام و _</td><td>age_2, student1</td><td>my-name (شرطة!)</td></tr>
+<tr><td>لا يكون كلمة محجوزة</td><td>my_class</td><td>class, if, for</td></tr>
+<tr><td>حساس لحالة الأحرف</td><td>Name ≠ name</td><td></td></tr>
+</table></div>
+
+<div class="warn"><div class="wt" style="color:#f87171">⛔ 35 كلمة محجوزة لا تستخدمها كأسماء متغيرات:</div>
+if, else, elif, for, while, def, return, class, import, from, as, try, except, finally, with, True, False, None, and, or, not, in, is, lambda, global, pass, break, continue, del, raise, yield, assert, async, await, nonlocal</div>
+
+${makePyEditor('vars2','# أسماء صحيحة\nmy_name = "سارة"\nage = 25\n_private = "سري"\n\n# جرّب تغيير القيمة!\nage = 30\nprint("الاسم:", my_name)\nprint("العمر:", age)',100)}
+
+<h3>📊 أنواع البيانات الأساسية</h3>
+
+<div class="cb"><div class="lb yl">1️⃣ الأعداد الصحيحة int</div>
+أرقام بدون فاصلة عشرية: 42, -10, 0, 1000000
+</div>
+<div class="cb g"><div class="lb gr">2️⃣ الأعداد العشرية float</div>
+أرقام بفاصلة عشرية: 3.14, -2.5, 0.0, 15.99
+</div>
+<div class="cb b"><div class="lb pu">3️⃣ السلاسل النصية str</div>
+نصوص بين علامات تنصيص: "أحمد", 'Hello', "123" (هذا نص وليس رقم!)
+</div>
+<div class="cb o"><div class="lb or">4️⃣ المنطقي bool</div>
+قيمتان فقط: True (صح) أو False (خطأ)
+</div>
+
+<div class="ez">فكّر فيها كأنواع حاويات:<br>
+🔢 <b>int</b> = علبة أرقام كاملة (42)<br>
+🔢 <b>float</b> = علبة أرقام بنقطة (3.14)<br>
+📝 <b>str</b> = ظرف فيه حروف ("أحمد")<br>
+✅ <b>bool</b> = مفتاح كهرب (True أو False)</div>
+
+${makePyEditor('types1','x = 42\ny = 3.14\nname = "سارة"\nis_happy = True\n\nprint(type(x))       # ما نوع x؟\nprint(type(y))       # ما نوع y؟\nprint(type(name))    # ما نوع name؟\nprint(type(is_happy)) # ما نوع is_happy?',120)}
+
+<h3>🔄 تحويل أنواع البيانات</h3>
+<div class="cb"><div class="lb yl">دوال التحويل</div>
+<code>int()</code> → يحول إلى عدد صحيح<br>
+<code>float()</code> → يحول إلى عدد عشري<br>
+<code>str()</code> → يحول إلى نص
+</div>
+
+<div class="ez">مثل تحويل العملات! عندك ريال (نص) وتحتاجه رقم لتحسب عليه. فتحوّله بـ int() أو float().</div>
+
+${makePyEditor('convert','# تحويل نص إلى رقم\nage_str = "25"\nage_int = int(age_str)\nprint(age_int + 5)       # 30\n\n# تحويل رقم إلى نص\nnumber = 42\nnumber_str = str(number)\nprint("الرقم هو: " + number_str)\n\n# تحويل صحيح لعشري\nprint(float(42))         # 42.0\nprint(int(3.14))         # 3 (يحذف الكسور)',140)}
+
+<h3>🔄 تحديث المتغيرات</h3>
+${makePyEditor('update','count = 0\nprint("قبل:", count)\n\ncount = count + 1   # زيادة 1\nprint("بعد:", count)\n\ncount += 5          # طريقة مختصرة: أضف 5\nprint("الآن:", count)',100)}
+
+<div class="warn"><div class="wt" style="color:#f87171">⚠️ خطأ شائع جداً!</div>
+لا يمكنك تحديث متغير لم تعرّفه بعد:<br>
+<code>unknown = unknown + 1</code> → <span style="color:#f87171">NameError!</span> لأن unknown ليس له قيمة أصلاً
+</div>
+</div>`;
+
+
+// ===== TAB 3: العوامل والتعبيرات =====
+S.t3=`<div class="card">
+<h2 style="color:#fbbf24">🔢 العوامل والتعبيرات</h2>
+
+<div class="cb"><div class="lb yl">ما هو العامل Operator؟</div>
+العامل هو <span class="hl">رمز خاص</span> يقوم بعملية على قيم (نسميها معاملات Operands).<br>
+مثلاً: في <code>5 + 3</code> ← العامل هو + والمعاملات هي 5 و 3
+</div>
+
+<div class="ez">العامل مثل الطبّاخ: يأخذ المكونات (المعاملات) ويسوي منها طبخة (النتيجة)!<br>
+🍳 + (الجمع) يأخذ 5 و 3 → يعطيك 8<br>
+🍳 * (الضرب) يأخذ 4 و 2 → يعطيك 8</div>
+
+<h3>➕ العوامل الحسابية</h3>
+<div class="tw"><table>
+<tr><th>العامل</th><th>الاسم</th><th>مثال</th><th>النتيجة</th></tr>
+<tr><td style="color:#fbbf24;font-weight:bold;font-size:1.1rem">+</td><td>الجمع</td><td>5 + 3</td><td>8</td></tr>
+<tr><td style="color:#fbbf24;font-weight:bold;font-size:1.1rem">-</td><td>الطرح</td><td>10 - 4</td><td>6</td></tr>
+<tr><td style="color:#fbbf24;font-weight:bold;font-size:1.1rem">*</td><td>الضرب</td><td>6 * 7</td><td>42</td></tr>
+<tr><td style="color:#fbbf24;font-weight:bold;font-size:1.1rem">/</td><td>القسمة العشرية</td><td>7 / 2</td><td>3.5</td></tr>
+<tr><td style="color:#fbbf24;font-weight:bold;font-size:1.1rem">//</td><td>القسمة الصحيحة</td><td>7 // 2</td><td>3</td></tr>
+<tr><td style="color:#fbbf24;font-weight:bold;font-size:1.1rem">%</td><td>باقي القسمة</td><td>7 % 3</td><td>1</td></tr>
+<tr><td style="color:#fbbf24;font-weight:bold;font-size:1.1rem">**</td><td>الأس (القوة)</td><td>2 ** 3</td><td>8</td></tr>
+</table></div>
+
+<div class="ez">
+<b>/</b> القسمة العادية: 7 / 2 = 3.5 (يعطيك الكسور)<br>
+<b>//</b> القسمة الصحيحة: 7 // 2 = 3 (يحذف الكسور، يعطيك العدد الكامل فقط)<br>
+<b>%</b> باقي القسمة: 7 % 3 = 1 (لأن 7 = 3×2 + <b>1</b>، الباقي هو 1)<br>
+<b>**</b> الأس: 2 ** 3 = 8 (يعني 2 × 2 × 2)
+</div>
+
+${makePyEditor('ops1','x = 10\ny = 3\n\nprint("الجمع:", x + y)        # 13\nprint("الطرح:", x - y)        # 7\nprint("الضرب:", x * y)        # 30\nprint("القسمة:", x / y)       # 3.333...\nprint("القسمة الصحيحة:", x // y)  # 3\nprint("باقي القسمة:", x % y)  # 1\nprint("الأس:", x ** 2)        # 100',150)}
+
+<h3>🧮 استخدامات عملية لباقي القسمة %</h3>
+<div class="cb g"><div class="lb gr">فحص زوجي/فردي</div>
+إذا كان <code>x % 2 == 0</code> فالعدد <b>زوجي</b><br>
+إذا كان <code>x % 2 != 0</code> فالعدد <b>فردي</b>
+</div>
+<div class="cb b"><div class="lb pu">استخراج الأرقام الأخيرة</div>
+<code>x % 10</code> → آخر رقم<br>
+<code>x % 100</code> → آخر رقمين
+</div>
+
+${makePyEditor('mod','n = 42\nprint(n % 2 == 0)    # True = زوجي\n\nx = 987654\nprint(x % 10)        # 4 (آخر رقم)\nprint(x % 100)       # 54 (آخر رقمين)\nprint(x % 5 == 0)    # False (لا يقبل القسمة على 5)',100)}
+
+<h3>📊 ترتيب العمليات PEMDAS</h3>
+<div class="cb"><div class="lb yl">الترتيب من الأعلى أولوية:</div>
+1️⃣ <b>P</b>arentheses → الأقواس () أولاً<br>
+2️⃣ <b>E</b>xponents → الأس ** ثانياً<br>
+3️⃣ <b>M</b>ultiplication/<b>D</b>ivision → الضرب والقسمة * / // %<br>
+4️⃣ <b>A</b>ddition/<b>S</b>ubtraction → الجمع والطرح + -
+</div>
+
+<div class="ez">مثل الرياضيات في المدرسة! الأقواس أولاً، ثم الأس، ثم الضرب والقسمة، ثم الجمع والطرح.<br>
+مثال: <code>2 + 3 * 4 = 14</code> (الضرب أولاً: 3×4=12، ثم الجمع: 2+12=14)<br>
+لكن: <code>(2 + 3) * 4 = 20</code> (الأقواس أولاً: 2+3=5، ثم الضرب: 5×4=20)</div>
+
+${makePyEditor('pemdas','print(2 + 3 * 4)       # 14 (الضرب أولاً)\nprint((2 + 3) * 4)     # 20 (الأقواس أولاً)\nprint(2 ** 3 + 1)      # 9 (الأس أولاً)\nprint((5 - 2) ** 2)    # 9\nprint(4 / 2 + 6)       # 8.0',100)}
+
+<h3>📝 عمليات على النصوص</h3>
+<div class="cb g"><div class="lb gr">+ للنصوص = دمج (وليس جمع!)</div>
+<code>"Hello" + " " + "World"</code> → <code>"Hello World"</code>
+</div>
+<div class="cb b"><div class="lb pu">* للنصوص = تكرار</div>
+<code>"Ha" * 3</code> → <code>"HaHaHa"</code>
+</div>
+
+${makePyEditor('strops','first = "مرحباً"\nlast = " يا عالم"\nprint(first + last)    # دمج النصوص\nprint("=-" * 20)       # تكرار\n\n# تحويل النوع للدمج\nname = "STD-"\nnum = 15\nprint(name + str(num)) # STD-15',100)}
+
+<h3>✅ العوامل المنطقية</h3>
+<div class="tw"><table>
+<tr><th>العامل</th><th>المعنى</th><th>مثال</th></tr>
+<tr><td><span class="hl">and</span></td><td>و (الاثنان معاً)</td><td>x > 0 and x < 10</td></tr>
+<tr><td><span class="hl">or</span></td><td>أو (واحد على الأقل)</td><td>x == 0 or x == 1</td></tr>
+<tr><td><span class="hl">not</span></td><td>ليس (عكس)</td><td>not (x > 5)</td></tr>
+</table></div>
+
+${makePyEditor('logic','score = 75\npassed = (score >= 60) and (score <= 100)\nprint("نجح؟", passed)  # True\n\nx = 12\nprint(x % 2 == 0)      # True (زوجي)\nprint(x > 0 and x < 10) # False',80)}
+
+<h3>⏱️ مثال تطبيقي: تحويل الثواني</h3>
+${makePyEditor('seconds','total_seconds = 7385\nhours = total_seconds // 3600\nminutes = (total_seconds % 3600) // 60\nseconds = total_seconds % 60\nprint(hours, "ساعة", minutes, "دقيقة", seconds, "ثانية")',80)}
+</div>`;
+
+
+// ===== TAB 4: القوائم والصفوف =====
+S.t4=`<div class="card">
+<h2 style="color:#fbbf24">📋 القوائم Lists والصفوف Tuples</h2>
+
+<div class="cb"><div class="lb yl">ما هي القائمة List؟</div>
+القائمة هي <span class="hl">مجموعة مرتبة من العناصر</span> داخل أقواس مربعة []. يمكنك تعديلها (إضافة، حذف، تغيير).
+</div>
+
+<div class="ez">القائمة مثل <b>قائمة التسوق</b>: تكتب فيها أشياء بالترتيب، وتقدر تضيف شيء جديد أو تشطب شيء منها أو تغير شيء!<br>
+🛒 ["حليب", "خبز", "بيض"] ← 3 عناصر مرتبة</div>
+
+<h3>📝 إنشاء القوائم</h3>
+${makePyEditor('list1','# قوائم مختلفة\nnumbers = [10, 20, 30, 40]\nfruits = ["apple", "banana", "orange"]\nmixed = ["نص", 42, 3.14, True]\nempty = []\n\nprint(numbers)\nprint(fruits)\nprint("عدد الفواكه:", len(fruits))',100)}
+
+<h3>🔍 الوصول للعناصر (الفهرسة Indexing)</h3>
+<div class="cb g"><div class="lb gr">الفهرس يبدأ من 0 وليس 1!</div>
+العنصر الأول فهرسه 0، والثاني 1، والثالث 2...<br>
+الفهرس السالب يبدأ من الآخر: -1 = الأخير، -2 = ما قبل الأخير
+</div>
+
+<div class="ez">مثل صف طلاب: الأول اسمه رقم 0 (مش 1!)<br>
+fruits = ["🍎", "🍌", "🍊", "🍇"]<br>
+الفهارس:    [0]   [1]   [2]   [3]<br>
+من الآخر:   [-4]  [-3]  [-2]  [-1]</div>
+
+${makePyEditor('indexing','fruits = ["apple", "banana", "orange", "grape"]\nprint(fruits[0])     # apple (الأول)\nprint(fruits[2])     # orange (الثالث)\nprint(fruits[-1])    # grape (الأخير)\nprint(fruits[-2])    # orange (ما قبل الأخير)\nprint(len(fruits))   # 4 (عدد العناصر)',100)}
+
+<h3>✏️ تعديل القائمة</h3>
+${makePyEditor('listmod','numbers = [17, 123, 45]\nprint("قبل:", numbers)\nnumbers[1] = 5\nprint("بعد:", numbers)  # [17, 5, 45]',60)}
+
+<h3>✂️ التجزئة Slicing</h3>
+<div class="cb"><div class="lb yl">list[start:end] - من start إلى ما قبل end</div>
+<code>t[:3]</code> → من البداية إلى 3 (لا يشمل 3)<br>
+<code>t[2:]</code> → من 2 إلى النهاية<br>
+<code>t[:]</code> → نسخة كاملة
+</div>
+
+${makePyEditor('slice','t = ["a", "b", "c", "d", "e", "f"]\nprint(t[1:3])   # ["b", "c"]\nprint(t[:4])    # ["a", "b", "c", "d"]\nprint(t[3:])    # ["d", "e", "f"]\nprint(t[:])     # نسخة كاملة',80)}
+
+<h3>🛠️ توابع القوائم المهمة</h3>
+<div class="tw"><table>
+<tr><th>التابع</th><th>الوظيفة</th><th>مثال</th></tr>
+<tr><td><span class="hl">append(x)</span></td><td>إضافة عنصر واحد في النهاية</td><td>list.append("new")</td></tr>
+<tr><td><span class="hl">extend(list2)</span></td><td>إضافة عناصر قائمة أخرى</td><td>list.extend([4,5])</td></tr>
+<tr><td><span class="hl">pop(i)</span></td><td>حذف وإرجاع عنصر بالفهرس</td><td>list.pop(0)</td></tr>
+<tr><td><span class="hl">remove(x)</span></td><td>حذف أول ظهور لقيمة</td><td>list.remove("a")</td></tr>
+<tr><td><span class="hl">sort()</span></td><td>ترتيب القائمة</td><td>list.sort()</td></tr>
+<tr><td><span class="hl">reverse()</span></td><td>عكس الترتيب</td><td>list.reverse()</td></tr>
+</table></div>
+
+${makePyEditor('listmethods','fruits = ["apple", "banana"]\nfruits.append("orange")\nprint("بعد append:", fruits)\n\nfruits.extend(["grape", "mango"])\nprint("بعد extend:", fruits)\n\nremoved = fruits.pop(1)\nprint("تم حذف:", removed)\nprint("بعد pop:", fruits)\n\nnumbers = [3, 1, 4, 1, 5, 9]\nnumbers.sort()\nprint("مرتب:", numbers)',140)}
+
+<h3>📊 الدوال الجاهزة للقوائم</h3>
+${makePyEditor('listfuncs','nums = [3, 41, 12, 9, 74, 15]\nprint("العدد:", len(nums))     # 6\nprint("الأكبر:", max(nums))    # 74\nprint("الأصغر:", min(nums))    # 3\nprint("المجموع:", sum(nums))   # 154\nprint("المتوسط:", sum(nums) / len(nums))',80)}
+
+<h3>🔄 المرور على القائمة بحلقة for</h3>
+${makePyEditor('listfor','cheeses = ["Cheddar", "Edam", "Gouda"]\nfor cheese in cheeses:\n    print("أحب", cheese)\n\nprint("---")\nnumbers = [1, 2, 3, 4]\nfor i in range(len(numbers)):\n    numbers[i] = numbers[i] * 2\nprint("مضاعفة:", numbers)',100)}
+
+<h3>🔗 عمليات القوائم</h3>
+${makePyEditor('listops','a = [1, 2, 3]\nb = [4, 5, 6]\nprint(a + b)        # جمع: [1, 2, 3, 4, 5, 6]\nprint([0] * 4)      # تكرار: [0, 0, 0, 0]\nprint(3 in a)       # عضوية: True\nprint(7 in a)       # عضوية: False',80)}
+
+<h3>🔒 الصفوف Tuples</h3>
+<div class="cb b"><div class="lb pu">الصف = قائمة لا يمكن تعديلها!</div>
+يُنشأ بأقواس عادية () بدل المربعة []. لا يمكنك إضافة أو حذف أو تغيير عناصره.
+</div>
+
+<div class="ez">الصف مثل <b>شهادة الميلاد</b>: المعلومات فيها ثابتة لا تتغير!<br>
+بينما القائمة مثل <b>قائمة التسوق</b>: تتغير كل يوم.</div>
+
+${makePyEditor('tuple1','point = (3, 4)\nprint(point)\nprint(point[0])    # 3\nprint(point[1])    # 4\nprint(len(point))  # 2\n\n# تفريغ الصف\nx, y = point\nprint("x =", x, ", y =", y)\n\n# صف بعنصر واحد (لازم فاصلة!)\nsingle = (42,)\nprint(type(single))  # tuple',120)}
+
+<h3>📊 القوائم vs الصفوف</h3>
+<div class="tw"><table>
+<tr><th>الميزة</th><th>القوائم Lists []</th><th>الصفوف Tuples ()</th></tr>
+<tr><td>التعديل</td><td>✅ قابلة للتعديل</td><td>❌ غير قابلة</td></tr>
+<tr><td>الاستخدام</td><td>بيانات متغيرة (قائمة تسوق)</td><td>بيانات ثابتة (إحداثيات)</td></tr>
+<tr><td>السرعة</td><td>أبطأ قليلاً</td><td>أسرع قليلاً</td></tr>
+<tr><td>كمفتاح قاموس</td><td>❌ لا يمكن</td><td>✅ يمكن</td></tr>
+</table></div>
+</div>`;
+
+
+// ===== TAB 5: print و input =====
+S.t5=`<div class="card">
+<h2 style="color:#fbbf24">🖨️ دالة الطباعة print() ودالة الإدخال input()</h2>
+
+<h3>🖨️ دالة print() بالتفصيل</h3>
+<div class="cb"><div class="lb yl">ماذا تفعل print()؟</div>
+تعرض (تطبع) ما بداخل الأقواس على الشاشة. تستطيع طباعة نصوص وأرقام ومتغيرات.
+</div>
+
+<div class="ez">print() مثل <b>مكبر الصوت</b>: تعطيه شيء وهو يعلنه للجميع!<br>
+print("مرحبا") ← مكبر الصوت يقول: مرحبا</div>
+
+<h3>📝 طرق استخدام print()</h3>
+${makePyEditor('print1','# 1. طباعة نص\nprint("مرحباً بالعالم")\n\n# 2. طباعة رقم\nprint(42)\nprint(3.14)\n\n# 3. طباعة متغير\nname = "أحمد"\nprint(name)\n\n# 4. طباعة عدة أشياء (بينها مسافة تلقائياً)\nage = 25\nprint("الاسم:", name, "العمر:", age)',130)}
+
+<h3>⚙️ خيارات print() المتقدمة</h3>
+<div class="cb g"><div class="lb gr">sep = الفاصل بين العناصر (تلقائياً مسافة)</div>
+<code>print("أ", "ب", "ج", sep="-")</code> → <code>أ-ب-ج</code>
+</div>
+<div class="cb b"><div class="lb pu">end = ما يُضاف في نهاية السطر (تلقائياً سطر جديد)</div>
+<code>print("أ", end=" ")</code> ← لا ينزل سطر جديد
+</div>
+
+${makePyEditor('print2','# الفاصل المخصص sep\nprint("تفاح", "برتقال", "موز", sep="-")\nprint("تفاح", "برتقال", "موز", sep=" ♥ ")\n\n# نهاية السطر end\nprint("سطر 1", end=" ")\nprint("سطر 2")\n# يطبعهم على نفس السطر!',100)}
+
+<h3>✨ f-strings (الأسهل والأفضل!)</h3>
+<div class="cb"><div class="lb yl">f-string = نص يحتوي متغيرات بداخله</div>
+ضع حرف <code>f</code> قبل النص، ثم ضع المتغيرات داخل أقواس معقوفة {}<br>
+<code>print(f"اسمي {name} وعمري {age}")</code>
+</div>
+
+<div class="ez">f-string مثل <b>نموذج فارغ تملأه</b>:<br>
+"اسمي {___} وعمري {___}" ← ضع القيم في الفراغات!<br>
+f"اسمي {name} وعمري {age}" → "اسمي أحمد وعمري 25"</div>
+
+${makePyEditor('fstring','name = "سارة"\nage = 22\nheight = 1.65\n\n# f-string\nprint(f"اسمي {name}")\nprint(f"عمري {age} سنة")\nprint(f"طولي {height} متر")\n\n# تنسيق الأرقام العشرية\npi = 3.14159\nprint(f"باي = {pi:.2f}")  # رقمين بعد النقطة',120)}
+
+<h3>⌨️ دالة input() بالتفصيل</h3>
+<div class="cb"><div class="lb yl">ماذا تفعل input()؟</div>
+تنتظر المستخدم ليكتب شيئاً من لوحة المفاتيح، ثم ترجع ما كتبه <span class="hl">كنص str دائماً</span>!
+</div>
+
+<div class="ez">input() مثل <b>الميكروفون</b>: تسأل المستخدم سؤال وتنتظر إجابته.<br>
+⚠️ مهم جداً: حتى لو كتب المستخدم رقم مثل 25، input() ترجعه كنص "25"!<br>
+لذلك إذا تبي تحسب عليه، لازم تحوّله بـ int() أو float()</div>
+
+<div class="cb r"><div class="lb" style="color:#f87171">⚠️ القاعدة الذهبية لـ input():</div>
+input() <b>دائماً ترجع نص str</b>!<br>
+لذلك إذا تحتاج رقم:<br>
+<code>age = int(input("عمرك؟"))</code> ← حوّل لعدد صحيح<br>
+<code>height = float(input("طولك؟"))</code> ← حوّل لعدد عشري
+</div>
+
+<h3>💻 تطبيقات عملية</h3>
+${makePyEditorWithInputs('calc','print("=== حاسبة بسيطة ===")\nnum1 = float(input("أدخل الرقم الأول: "))\nnum2 = float(input("أدخل الرقم الثاني: "))\nprint(f"{num1} + {num2} = {num1 + num2}")\nprint(f"{num1} - {num2} = {num1 - num2}")\nprint(f"{num1} * {num2} = {num1 * num2}")\nprint(f"{num1} / {num2} = {num1 / num2:.2f}")',{n1:'الرقم الأول',n2:'الرقم الثاني'},140)}
+
+${makePyEditorWithInputs('bmi','name = input("أدخل اسمك: ")\nweight = float(input("أدخل وزنك بالكيلو: "))\nheight = float(input("أدخل طولك بالمتر: "))\nbmi = weight / (height ** 2)\nprint(f"مرحباً {name}")\nprint(f"مؤشر كتلة الجسم: {bmi:.2f}")\nif bmi < 18.5:\n    print("الفئة: نقص في الوزن")\nelif bmi < 25:\n    print("الفئة: وزن طبيعي")\nelif bmi < 30:\n    print("الفئة: زيادة في الوزن")\nelse:\n    print("الفئة: سمنة")',{n1:'الاسم',n2:'الوزن (كغ)',n3:'الطول (متر)'},180)}
+
+${makePyEditorWithInputs('currency','sar = float(input("أدخل المبلغ بالريال: "))\nrate = 3.75\nusd = sar / rate\nprint(f"{sar} ريال = {usd:.2f} دولار")',{n1:'المبلغ بالريال'},80)}
+</div>`;
+
+
+// ===== TAB 6: الأخطاء والتنقيح =====
+S.t6=`<div class="card">
+<h2 style="color:#fbbf24">🐛 الأخطاء الشائعة وكيف نصلحها</h2>
+
+<div class="cb"><div class="lb yl">3 أنواع من الأخطاء في بايثون:</div>
+1️⃣ <b>SyntaxError</b> → خطأ في كتابة الكود (قواعد اللغة)<br>
+2️⃣ <b>NameError</b> → استخدام متغير غير معرّف<br>
+3️⃣ <b>TypeError</b> → خلط أنواع بيانات غير متوافقة
+</div>
+
+<div class="ez">الأخطاء مثل الأخطاء الإملائية في العربي:<br>
+🔴 <b>SyntaxError</b> = كتبت كلمة غلط (primt بدل print)<br>
+🔴 <b>NameError</b> = ذكرت اسم شخص ما يعرفه أحد<br>
+🔴 <b>TypeError</b> = حاولت تجمع تفاح مع أرقام!</div>
+
+<h3>🔴 SyntaxError - خطأ في بناء الكود</h3>
+<div class="cb r"><div class="lb" style="color:#f87171">أمثلة شائعة:</div>
+<code>primt("hello")</code> → خطأ في اسم الدالة (primt بدل print)<br>
+<code>print("hello"</code> → نسيت قوس الإغلاق<br>
+<code>print("hello')</code> → خلط بين " و '
+</div>
+
+${makePyEditor('err1','# جرّب تصحيح هذا الكود:\nprimt("مرحبا")  # الخطأ: primt بدل print',60)}
+
+<h3>🔴 NameError - متغير غير معرّف</h3>
+<div class="cb r"><div class="lb" style="color:#f87171">يحدث عندما تستخدم اسم متغير لم تعرّفه بعد</div>
+<code>print(age)</code> → إذا لم تكتب <code>age = 25</code> قبلها!
+</div>
+
+${makePyEditor('err2','# هذا يسبب خطأ:\n# print(age)  # age غير معرّف!\n\n# الحل: عرّف المتغير أولاً\nage = 25\nprint(age)  # الآن يعمل!',80)}
+
+<h3>🔴 TypeError - خلط الأنواع</h3>
+<div class="cb r"><div class="lb" style="color:#f87171">لا يمكن جمع نص + رقم مباشرة!</div>
+<code>"العمر: " + 25</code> → TypeError!<br>
+<b>الحل:</b> <code>"العمر: " + str(25)</code> → حوّل الرقم لنص
+</div>
+
+${makePyEditor('err3','# خطأ شائع مع input()\nage = input("عمرك؟ ")\n# next_year = age + 1  # خطأ! age نص!\n\n# الحل الصحيح:\nage = int(input("عمرك؟ "))\nnext_year = age + 1\nprint("العام القادم:", next_year)',100)}
+
+<h3>🔴 ValueError - قيمة غير صالحة</h3>
+${makePyEditor('err4','# try-except للتعامل مع الأخطاء\ntry:\n    number = int("abc")  # لا يمكن تحويل "abc" لرقم!\n    print(number)\nexcept ValueError:\n    print("خطأ: يجب إدخال رقم صحيح!")',80)}
+
+<h3>🔧 نصائح ذهبية للتنقيح</h3>
+<div class="tip">💡 <b>1.</b> اقرأ رسالة الخطأ بهدوء - السهم يشير لموضع المشكلة<br>
+💡 <b>2.</b> غيّر شيئاً واحداً كل مرة ثم اختبر<br>
+💡 <b>3.</b> استخدم print() لفهم قيم المتغيرات أثناء التنفيذ<br>
+💡 <b>4.</b> تأكد من الأقواس والنقطتين والمسافات<br>
+💡 <b>5.</b> تأكد أن أسماء المتغيرات مكتوبة بنفس الطريقة في كل مكان</div>
+
+<h3>🎯 تمرين: صحح الأخطاء!</h3>
+${makePyEditor('fix1','# صحح كل الأخطاء في هذا الكود:\nnam = "أحمد"\nage = 25\n# primt("اسمي " + name)        # خطأ 1\n# print("عمري " + age)          # خطأ 2\n# Print("مرحبا")                # خطأ 3\n\n# الكود الصحيح:\nname = "أحمد"\nage = 25\nprint("اسمي " + name)\nprint("عمري " + str(age))\nprint("مرحبا")',140)}
+</div>`;
+
+// ===== TAB 7: محاكي بايثون حر =====
+S.t7=`<div class="card">
+<h2 style="color:#fbbf24">💻 محاكي بايثون الحر</h2>
+<div class="cb g"><div class="lb gr">اكتب أي كود بايثون وجرّبه!</div>
+هذا محاكي بسيط يدعم: print, input, المتغيرات, العمليات الحسابية, القوائم, الصفوف, if/else, for, while, الدوال, f-strings والمزيد.
+</div>
+
+${makePyEditor('free',`# اكتب كودك هنا وجرّب!
+# مثال: حاسبة المعدل
+grades = [85, 92, 78, 96, 88]
+total = sum(grades)
+count = len(grades)
+average = total / count
+
+print("الدرجات:", grades)
+print(f"المجموع: {total}")
+print(f"عدد المواد: {count}")
+print(f"المعدل: {average:.2f}")
+
+if average >= 90:
+    print("تقدير: ممتاز! 🌟")
+elif average >= 80:
+    print("تقدير: جيد جداً 👍")
+elif average >= 70:
+    print("تقدير: جيد")
+else:
+    print("تقدير: مقبول")`,300)}
+
+<h3>💡 أمثلة جاهزة للتجربة</h3>
+<div class="btn-row">
+<button class="btn btn-yl" onclick="document.getElementById('ed_free').value='# جدول الضرب\\nfor i in range(1, 11):\\n    print(f\\'5 x {i} = {5 * i}\\')'">جدول الضرب</button>
+<button class="btn btn-gr" onclick="document.getElementById('ed_free').value='# ترتيب قائمة\\nnums = [64, 34, 25, 12, 22, 11, 90]\\nprint(\"قبل:\", nums)\\nnums.sort()\\nprint(\"بعد:\", nums)\\nprint(\"الأكبر:\", max(nums))\\nprint(\"الأصغر:\", min(nums))'">ترتيب قائمة</button>
+<button class="btn btn-pu" onclick="document.getElementById('ed_free').value='# عمليات على النصوص\\ntext = \"Hello Python World\"\\nprint(\"أصلي:\", text)\\nprint(\"كبير:\", text.upper())\\nprint(\"صغير:\", text.lower())\\nwords = text.split()\\nprint(\"الكلمات:\", words)\\nprint(\"عدد الكلمات:\", len(words))'">عمليات نصية</button>
+<button class="btn btn-re" onclick="document.getElementById('ed_free').value='# تبديل قيمتين\\na = 10\\nb = 20\\nprint(f\"قبل: a={a}, b={b}\")\\na, b = b, a\\nprint(f\"بعد: a={a}, b={b}\")'">تبديل قيمتين</button>
+</div>
+</div>`;
+
+
+// ===== QUIZ: 80 Questions =====
+S.quiz=`<div class="card">
+<h2 style="color:#fbbf24">✅ اختبار ذاتي شامل - 80 سؤال</h2>
+<p style="font-size:.82rem;color:#94a3b8;margin-bottom:.5rem">20 سؤال لكل موضوع | 20 سؤال استخراج أخطاء | كل الأسئلة اختيار من متعدد</p>
+<div class="sb"><div class="sn" id="quizScore">0 / 80</div><p style="color:#94a3b8;font-size:.78rem">النتيجة</p>
+<div class="progress-bar"><div class="progress-fill" id="quizBar" style="width:0%"></div></div>
+</div>
+<button class="rb" onclick="resetQuiz()">↺ إعادة الاختبار</button>
+
+<h3>📘 الموضوع الأول: مقدمة في بايثون (أسئلة 1-20)</h3>
+${[
+{q:'1. ما هي وظيفة دالة print() في بايثون؟',o:['تخزين البيانات في الذاكرة','عرض المخرجات على الشاشة','قراءة إدخال المستخدم','حذف المتغيرات'],a:1,e:'print() تعرض (تطبع) ما بداخل الأقواس على الشاشة'},
+{q:'2. أي من التالي هو التعليق الصحيح في بايثون؟',o:['// هذا تعليق','/* هذا تعليق */','# هذا تعليق','<!-- هذا تعليق -->'],a:2,e:'في بايثون نستخدم # للتعليقات'},
+{q:'3. بايثون لغة تستخدم:',o:['المترجم Compiler فقط','المفسّر Interpreter','لغة الآلة مباشرة','لا شيء مما سبق'],a:1,e:'بايثون تستخدم المفسّر الذي ينفذ الكود سطراً بسطر'},
+{q:'4. أي جملة صحيحة عن بايثون؟',o:['بايثون حساسة لحالة الأحرف (Name ≠ name)','بايثون لا تفرق بين الأحرف الكبيرة والصغيرة','بايثون تعمل فقط على Windows','بايثون صعبة التعلم'],a:0,e:'بايثون حساسة لحالة الأحرف: Name و name متغيران مختلفان'},
+{q:'5. ما الناتج: print("Hello" + " World")؟',o:['Hello World','HelloWorld','Hello + World','خطأ'],a:0,e:'عامل + يدمج النصوص معاً'},
+{q:'6. ما وظيفة CPU في الحاسب؟',o:['تخزين البيانات الدائم','عرض الصور على الشاشة','تنفيذ التعليمات ومعالجة البيانات','الاتصال بالإنترنت'],a:2,e:'CPU = وحدة المعالجة المركزية، تنفذ التعليمات'},
+{q:'7. أي من التالي ملف بايثون صحيح؟',o:['program.py','program.java','program.html','program.txt'],a:0,e:'ملفات بايثون تنتهي بامتداد .py'},
+{q:'8. الفرق بين RAM والتخزين الدائم:',o:['RAM أبطأ','RAM تحتفظ بالبيانات عند إطفاء الجهاز','RAM سريعة لكن تمسح عند إطفاء الجهاز','لا فرق بينهما'],a:2,e:'RAM = ذاكرة مؤقتة سريعة تمسح عند إطفاء الجهاز'},
+{q:'9. ما الناتج: print(2 + 3)؟',o:['23','5','2 + 3','خطأ'],a:1,e:'2 و 3 أرقام فالعامل + يجمعهما: 2+3=5'},
+{q:'10. Google Colab هو:',o:['لغة برمجة جديدة','بيئة بايثون جاهزة في المتصفح','نظام تشغيل','محرك بحث'],a:1,e:'Google Colab يوفر بيئة بايثون جاهزة في المتصفح بدون تثبيت'},
+{q:'11. الخوارزمية هي:',o:['لغة برمجة','جهاز حاسب','سلسلة خطوات مرتبة لحل مشكلة','نوع من الذاكرة'],a:2,e:'الخوارزمية = خطوات واضحة ومرتبة لحل مشكلة'},
+{q:'12. أي مما يلي من لغات البرمجة عالية المستوى؟',o:['لغة الآلة (0 و 1)','لغة التجميع Assembly','Python','لا شيء مما سبق'],a:2,e:'Python لغة عالية المستوى، قريبة من لغة البشر'},
+{q:'13. ما الناتج: print("Ha" * 3)؟',o:['Ha3','HaHaHa','Ha * 3','خطأ'],a:1,e:'عامل * يكرر النص: "Ha" × 3 = "HaHaHa"'},
+{q:'14. أي شركة من التالي تستخدم بايثون؟',o:['Google','NASA','Disney','جميع ما سبق'],a:3,e:'جميع هذه الشركات تستخدم بايثون'},
+{q:'15. print() بدون أي شيء بداخلها:',o:['تسبب خطأ','تطبع سطر فارغ','تطبع None','لا تفعل شيء'],a:1,e:'print() بدون محتوى تطبع سطراً فارغاً'},
+{q:'16. الفرق بين المفسر والمترجم:',o:['المفسر ينفذ سطراً بسطر، المترجم يترجم كل البرنامج ثم ينفذه','لا فرق بينهما','المترجم ينفذ سطراً بسطر','المفسر أسرع دائماً'],a:0,e:'المفسّر = سطر بسطر، المترجم = كل البرنامج ثم ينفذه'},
+{q:'17. ما نوع الخطأ في: primt("hello")؟',o:['NameError','SyntaxError','TypeError','ValueError'],a:0,e:'primt غير معرّف (الصحيح print)، فيسبب NameError'},
+{q:'18. البرمجة الإجرائية تعني:',o:['برنامج مبني على كائنات','برنامج كسلسلة خطوات ودوال','برمجة بلغة الآلة فقط','لا شيء مما سبق'],a:1,e:'البرمجة الإجرائية = خطوات متسلسلة ودوال'},
+{q:'19. لتشغيل بايثون على Google Colab تضغط:',o:['Ctrl+C','F5','Shift+Enter','Alt+F4'],a:2,e:'Shift+Enter ينفذ الخلية في Google Colab'},
+{q:'20. المكونات الأساسية للبرامج تشمل:',o:['التسلسل والشرط والتكرار','الشاشة والفأرة فقط','الإنترنت والبريد','لا شيء مما سبق'],a:0,e:'البرامج تبنى من: تسلسل، شرط، تكرار، إدخال/إخراج، ودوال'}
+].map((q,i)=>makeQ('q'+(i+1),q)).join('')}
+
+<h3>📦 الموضوع الثاني: المتغيرات وأنواع البيانات (أسئلة 21-40)</h3>
+${[
+{q:'21. ما الناتج: type(42)؟',o:["<class 'str'>","<class 'int'>","<class 'float'>","<class 'bool'>"],a:1,e:'42 عدد صحيح فنوعه int'},
+{q:'22. أي اسم متغير صحيح؟',o:['2name','my-name','my_name','class'],a:2,e:'my_name صحيح: يبدأ بحرف ويحتوي _ فقط'},
+{q:'23. ما الناتج: type("123")؟',o:["<class 'int'>","<class 'str'>","<class 'float'>","<class 'list'>"],a:1,e:'"123" بين علامات تنصيص = نص str وليس رقم!'},
+{q:'24. ما الناتج: int(3.14)؟',o:['3.14','3','4','خطأ'],a:1,e:'int() يحذف الجزء العشري: 3.14 → 3'},
+{q:'25. x = 10 ثم x = 20، ما قيمة x؟',o:['10','30','20','خطأ'],a:2,e:'القيمة الجديدة 20 تستبدل القيمة القديمة 10'},
+{q:'26. ما الناتج: float(42)؟',o:['42','42.0','"42"','خطأ'],a:1,e:'float() يحول الصحيح لعشري: 42 → 42.0'},
+{q:'27. أي من التالي قيمة منطقية bool؟',o:['42','"True"','True','3.14'],a:2,e:'True (بدون علامات تنصيص) هي قيمة منطقية bool'},
+{q:'28. ما الخطأ في: 2name = "أحمد"؟',o:['لا يوجد خطأ','اسم المتغير يبدأ برقم','القيمة خطأ','لم نستخدم print'],a:1,e:'أسماء المتغيرات لا يمكن أن تبدأ برقم'},
+{q:'29. count = 0 ثم count += 5، ما قيمة count؟',o:['0','5','50','خطأ'],a:1,e:'count += 5 تعني count = count + 5 = 0 + 5 = 5'},
+{q:'30. ما الناتج: str(100) + str(200)؟',o:['300','"100200"','"300"','خطأ'],a:1,e:'str يحول لنص، والنصوص تُدمج: "100" + "200" = "100200"'},
+{q:'31. ما نوع البيانات لـ True؟',o:['int','str','bool','float'],a:2,e:'True و False نوعهم bool (منطقي)'},
+{q:'32. أي كلمة لا يمكن استخدامها كاسم متغير؟',o:['student','my_age','for','name1'],a:2,e:'for كلمة محجوزة في بايثون (تستخدم للحلقات)'},
+{q:'33. ما الناتج: "سارة" * 2؟',o:['سارة2','سارةسارة','خطأ','4'],a:1,e:'عامل * يكرر النص: "سارة" مرتين = "سارةسارة"'},
+{q:'34. input() دائماً ترجع:',o:['int','float','str','bool'],a:2,e:'input() ترجع دائماً نص str حتى لو أدخلت رقماً'},
+{q:'35. ما الطريقة الصحيحة لقراءة عدد صحيح من المستخدم؟',o:['age = input("عمرك؟")','age = int(input("عمرك؟"))','age = float(input("عمرك؟"))','age = str(input("عمرك؟"))'],a:1,e:'نحيط input() بـ int() لتحويل النص لعدد صحيح'},
+{q:'36. ما الناتج: type(3.0)؟',o:["<class 'int'>","<class 'float'>","<class 'str'>","<class 'bool'>"],a:1,e:'3.0 عدد عشري (فيه نقطة) فنوعه float'},
+{q:'37. x = "Hello" ثم print(type(x))، الناتج:',o:["<class 'int'>","<class 'list'>","<class 'str'>","<class 'float'>"],a:2,e:'"Hello" نص بين علامات تنصيص = str'},
+{q:'38. ما معنى = في بايثون؟',o:['مقارنة (يساوي)','إسناد (تخزين قيمة)','جمع','حذف'],a:1,e:'= تعني إسناد (خزّن القيمة في المتغير)، بينما == للمقارنة'},
+{q:'39. ما الناتج: print("العمر: " + str(25))؟',o:['العمر: 25','خطأ TypeError','العمر: str(25)','25'],a:0,e:'str(25) يحول 25 لنص "25" ثم يُدمج مع "العمر: "'},
+{q:'40. المتغير في بايثون يمكن تغيير نوعه:',o:['نعم، بايثون مرنة في الأنواع','لا، النوع ثابت','فقط من int إلى float','لا شيء مما سبق'],a:0,e:'بايثون dynamically typed: يمكنك تغيير نوع المتغير بإعادة الإسناد'}
+].map((q,i)=>makeQ('q'+(i+21),q)).join('')}
+
+
+<h3>🔢 الموضوع الثالث: العوامل والتعبيرات (أسئلة 41-60)</h3>
+${[
+{q:'41. ما الناتج: 7 // 2؟',o:['3.5','3','4','3.0'],a:1,e:'// القسمة الصحيحة: يحذف الكسور، 7÷2=3 والباقي يُحذف'},
+{q:'42. ما الناتج: 7 % 3؟',o:['2','1','2.33','0'],a:1,e:'% باقي القسمة: 7 = 3×2 + 1، الباقي = 1'},
+{q:'43. ما الناتج: 2 ** 4؟',o:['8','16','6','24'],a:1,e:'** الأس: 2⁴ = 2×2×2×2 = 16'},
+{q:'44. ما الناتج: 2 + 3 * 4؟',o:['20','14','24','12'],a:1,e:'الضرب قبل الجمع: 3×4=12، ثم 2+12=14'},
+{q:'45. ما الناتج: (2 + 3) * 4؟',o:['14','20','24','12'],a:1,e:'الأقواس أولاً: 2+3=5، ثم 5×4=20'},
+{q:'46. ما الناتج: 10 / 3؟',o:['3','3.33','3.3333333333333335','خطأ'],a:2,e:'/ القسمة العشرية: تعطي نتيجة عشرية دائماً'},
+{q:'47. لفحص هل العدد زوجي نستخدم:',o:['x / 2 == 0','x // 2 == 0','x % 2 == 0','x ** 2 == 0'],a:2,e:'x % 2 == 0: إذا كان باقي القسمة على 2 يساوي صفر فهو زوجي'},
+{q:'48. ما الناتج: "Hello" + " " + "World"؟',o:['Hello World','HelloWorld','Hello + World','خطأ'],a:0,e:'+ يدمج النصوص: "Hello" + " " + "World" = "Hello World"'},
+{q:'49. ما الناتج: 115 % 10؟',o:['11','5','15','1'],a:1,e:'115 % 10 = آخر رقم = 5'},
+{q:'50. ما الناتج: 115 % 100؟',o:['1','5','15','115'],a:2,e:'115 % 100 = آخر رقمين = 15'},
+{q:'51. الترتيب الصحيح لأسبقية العمليات:',o:['+ - * /','() ** * / + -','* / + - **','+ - () * /'],a:1,e:'PEMDAS: أقواس، أس، ضرب/قسمة، جمع/طرح'},
+{q:'52. ما الناتج: not True؟',o:['True','False','None','خطأ'],a:1,e:'not يعكس القيمة المنطقية: not True = False'},
+{q:'53. ما الناتج: True and False؟',o:['True','False','None','خطأ'],a:1,e:'and تحتاج كلاهما صحيح: True and False = False'},
+{q:'54. ما الناتج: True or False؟',o:['True','False','None','خطأ'],a:0,e:'or تحتاج واحد على الأقل صحيح: True or False = True'},
+{q:'55. ما الناتج: (5 >= 5) and (3 < 4)؟',o:['True','False','5','خطأ'],a:0,e:'5>=5 صحيح و 3<4 صحيح، True and True = True'},
+{q:'56. x = 10، ما الناتج: x += 5 ثم print(x)؟',o:['5','10','15','خطأ'],a:2,e:'x += 5 تعني x = x + 5 = 10 + 5 = 15'},
+{q:'57. ما الناتج: 2 ** 3 ** 2؟',o:['64','512','36','خطأ'],a:1,e:'** يُقيّم من اليمين: 3**2=9 ثم 2**9=512'},
+{q:'58. عامل // على أعداد سالبة: -7 // 2 =',o:['-3','-4','-3.5','3'],a:1,e:'// يقرّب لأسفل دائماً: -7÷2=-3.5 → يقرّب لـ -4'},
+{q:'59. لدمج عدد مع نص نستخدم:',o:['"العدد: " + 5','"العدد: " + str(5)','str("العدد: ") + 5','لا يمكن الدمج'],a:1,e:'يجب تحويل الرقم لنص أولاً بـ str() ثم الدمج بـ +'},
+{q:'60. f"القيمة: {3.14159:.2f}" تعطي:',o:['القيمة: 3.14159','القيمة: 3.14','القيمة: 3','القيمة: .2f'],a:1,e:':.2f يعني رقمين بعد النقطة العشرية: 3.14'}
+].map((q,i)=>makeQ('q'+(i+41),q)).join('')}
+
+<h3>📋 الموضوع الرابع: القوائم والصفوف (أسئلة 61-80، منها 20 سؤال أخطاء)</h3>
+${[
+{q:'61. ما الناتج: len([1, 2, 3, 4, 5])؟',o:['4','5','6','خطأ'],a:1,e:'len() يحسب عدد العناصر: 5 عناصر'},
+{q:'62. ما الناتج: [1, 2, 3][0]؟',o:['0','1','2','3'],a:1,e:'الفهرس 0 = العنصر الأول = 1'},
+{q:'63. ما الناتج: [1, 2, 3][-1]؟',o:['1','2','3','خطأ'],a:2,e:'الفهرس -1 = العنصر الأخير = 3'},
+{q:'64. ما الفرق بين append و extend؟',o:['لا فرق','append يضيف عنصر واحد، extend يضيف عناصر قائمة','append للنصوص و extend للأرقام','append أسرع'],a:1,e:'append يضيف عنصراً واحداً، extend يضيف كل عناصر القائمة'},
+{q:'65. الصفوف Tuples تختلف عن القوائم بأنها:',o:['أسرع فقط','غير قابلة للتعديل (immutable)','تحتوي نصوص فقط','أبطأ فقط'],a:1,e:'الصفوف immutable: لا يمكن تعديل عناصرها بعد الإنشاء'},
+{q:'66. ما الناتج: (42,) ← ما نوعه؟',o:['int','tuple','list','str'],a:1,e:'الفاصلة بعد 42 تجعله tuple. بدون فاصلة (42) يكون int'},
+{q:'67. [1,2]+[3,4] يعطي:',o:['[4, 6]','[1, 2, 3, 4]','10','خطأ'],a:1,e:'+ يدمج القوائم: [1,2] + [3,4] = [1,2,3,4]'},
+{q:'68. [0] * 3 يعطي:',o:['[0, 0, 0]','[3]','0','خطأ'],a:0,e:'* يكرر القائمة: [0] ثلاث مرات = [0, 0, 0]'},
+{q:'69. 3 in [1, 2, 3, 4] يعطي:',o:['True','False','3','خطأ'],a:0,e:'in يتحقق من وجود العنصر: 3 موجود في القائمة = True'},
+{q:'70. ما يفعله .sort()؟',o:['يحذف القائمة','يرتب القائمة تصاعدياً','ينسخ القائمة','يعكس القائمة'],a:1,e:'.sort() يرتب عناصر القائمة تصاعدياً في مكانها'},
+{q:'71. 🐛 ما الخطأ: x = [1, 2, 3]; print(x[3])؟',o:['لا يوجد خطأ','IndexError: الفهرس 3 غير موجود (آخر فهرس هو 2)','SyntaxError','TypeError'],a:1,e:'القائمة فيها 3 عناصر بفهارس 0,1,2. الفهرس 3 خارج النطاق!'},
+{q:'72. 🐛 ما الخطأ: name = input("اسمك؟"); print(name + 5)؟',o:['لا يوجد خطأ','SyntaxError','TypeError: لا يمكن جمع نص مع رقم','NameError'],a:2,e:'input() يرجع نص، ولا يمكن جمع نص "أحمد" + رقم 5'},
+{q:'73. 🐛 ما الخطأ: Print("hello")؟',o:['لا يوجد خطأ','NameError: Print بحرف كبير غير معرّف','SyntaxError','TypeError'],a:1,e:'بايثون حساسة للأحرف: Print ≠ print. الصحيح print بحرف صغير'},
+{q:'74. 🐛 ما الخطأ: my-name = "أحمد"؟',o:['لا يوجد خطأ','SyntaxError: الشرطة - غير مسموحة في أسماء المتغيرات','TypeError','NameError'],a:1,e:'استخدم _ بدل -: my_name صحيح، my-name خطأ'},
+{q:'75. 🐛 ما الخطأ: print("مرحبا)؟',o:['لا يوجد خطأ','SyntaxError: علامة التنصيص غير مغلقة','NameError','TypeError'],a:1,e:'بدأ بـ " لكن لم يغلق بـ ". يجب: print("مرحبا")'},
+{q:'76. 🐛 ما الخطأ: age = int("abc")؟',o:['لا يوجد خطأ','SyntaxError','TypeError','ValueError: لا يمكن تحويل "abc" لرقم'],a:3,e:'"abc" ليس رقماً فلا يمكن تحويله بـ int()'},
+{q:'77. 🐛 ما الخطأ: for i in range(5) ← بدون نقطتين:',o:['لا يوجد خطأ','SyntaxError: نسيت النقطتين : بعد for','NameError','TypeError'],a:1,e:'بعد for و if و while يجب وضع نقطتين :'},
+{q:'78. 🐛 ما الخطأ: t = (1,2,3); t[0] = 10؟',o:['لا يوجد خطأ','TypeError: الصفوف غير قابلة للتعديل','IndexError','SyntaxError'],a:1,e:'الصفوف tuple غير قابلة للتعديل immutable'},
+{q:'79. 🐛 ما الخطأ: print(5 + "5")؟',o:['لا يوجد خطأ','الناتج 10','TypeError: لا يمكن جمع int مع str','الناتج 55'],a:2,e:'5 رقم و "5" نص. لا يمكن جمعهما. حوّل بـ str(5) أو int("5")'},
+{q:'80. 🐛 ما الخطأ: fruits = ["a","b"]; fruits.append(["c","d"])؟',o:['لا يوجد خطأ (لكن النتيجة قد لا تكون المقصودة)','SyntaxError','TypeError','IndexError'],a:0,e:'لا يوجد خطأ فني، لكن append يضيف القائمة كعنصر واحد: ["a","b",["c","d"]]. إذا أردت إضافة العناصر استخدم extend'}
+].map((q,i)=>makeQ('q'+(i+61),q)).join('')}
+
+</div>`;
+
+
+// ===== Quiz Functions =====
+let quizAnswered=0,quizCorrect=0;
+
+function makeQ(id,q){
+let html=`<div class="qc" id="${id}"><h4>${q.q.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</h4>`;
+q.o.forEach((o,i)=>{
+  let cls=o.includes('print(')||o.includes('=')||o.includes('[')||o.includes('(')||o.includes('>')||o.includes('<')?'':'ar';
+  html+=`<div class="qo ${cls}" onclick="ansQ('${id}',${i},${q.a},this)">${o.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>`;
+});
+html+=`<div class="qe" id="${id}_e">${q.e.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div></div>`;
+return html;
+}
+
+function ansQ(id,chosen,correct,el){
+if(el.classList.contains('d'))return;
+let qc=document.getElementById(id);
+qc.querySelectorAll('.qo').forEach(o=>{o.classList.add('d');});
+quizAnswered++;
+if(chosen===correct){
+  el.classList.add('ok');quizCorrect++;
+  let e=document.getElementById(id+'_e');e.className='qe s ok';
+}else{
+  el.classList.add('no');
+  qc.querySelectorAll('.qo')[correct].classList.add('ok');
+  let e=document.getElementById(id+'_e');e.className='qe s no';
+}
+document.getElementById('quizScore').textContent=quizCorrect+' / 80';
+document.getElementById('quizBar').style.width=(quizAnswered/80*100)+'%';
+}
+
+function resetQuiz(){
+quizAnswered=0;quizCorrect=0;
+document.getElementById('quizScore').textContent='0 / 80';
+document.getElementById('quizBar').style.width='0%';
+document.querySelectorAll('.qo').forEach(o=>{o.classList.remove('ok','no','d');});
+document.querySelectorAll('.qe').forEach(e=>{e.className='qe';});
+window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== Render =====
+function render(){
+document.getElementById('content').innerHTML=S[cur]||'<div class="card"><h2>قريباً...</h2></div>';
+}
+render();
+</script>
+</body>
+</html>
