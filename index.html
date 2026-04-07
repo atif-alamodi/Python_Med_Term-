@@ -115,58 +115,33 @@ const S={};
 
 // ===== PYTHON MINI INTERPRETER =====
 function pyRun(editorId,outputId,inputsObj){
-const code=document.getElementById(editorId).value;
-const outEl=document.getElementById(outputId);
+var edEl=document.getElementById(editorId);
+var outEl=document.getElementById(outputId);
+if(!edEl||!outEl)return;
+var code=edEl.value;
 outEl.innerHTML='';
-let output='';
-const inputs=inputsObj||{};
-let inputIdx=0;
-const inputVals=Object.values(inputs);
+var output='';
+var inputs=inputsObj||{};
+var inputIdx=0;
+var inputVals=Object.values(inputs);
+var vars={};
 
-// Simple Python interpreter subset
 try{
-let vars={};
-let lines=code.split('\n');
-let i=0;
-function getVal(expr){
-  expr=expr.trim();
-  if(expr==='')return '';
-  // Handle f-strings
-  if(expr.match(/^f['"]/)){
-    let q=expr[1];let s=expr.slice(2,-1);
-    return s.replace(/\{([^}]+)\}/g,(_,e)=>evalExpr(e));
-  }
-  // string
-  if((expr[0]==='"'&&expr[expr.length-1]==='"')||(expr[0]==="'"&&expr[expr.length-1]==="'"))return expr.slice(1,-1);
-  // number
-  if(!isNaN(expr)&&expr!=='')return Number(expr);
-  // bool
-  if(expr==='True')return true;
-  if(expr==='False')return false;
-  // None
-  if(expr==='None')return null;
-  // list literal
-  if(expr[0]==='['&&expr[expr.length-1]===']'){
-    if(expr==='[]')return [];
-    let items=smartSplit(expr.slice(1,-1),',');
-    return items.map(x=>getVal(x.trim()));
-  }
-  // tuple literal
-  if(expr[0]==='('&&expr[expr.length-1]===')'){
-    let inner=expr.slice(1,-1).trim();
-    if(inner==='')return [];
-    let items=smartSplit(inner,',');
-    return items.map(x=>getVal(x.trim()));
-  }
-  // variable
-  if(vars.hasOwnProperty(expr))return vars[expr];
-  // function calls & expressions
-  return evalExpr(expr);
+function fmtVal(x){
+  if(x===null)return'None';if(x===true)return'True';if(x===false)return'False';
+  if(Array.isArray(x))return'['+x.map(function(v){return typeof v==='string'?"'"+v+"'":fmtVal(v)}).join(', ')+']';
+  return String(x);
+}
+function fmtPrint(x){
+  if(x===null)return'None';if(x===true)return'True';if(x===false)return'False';
+  if(Array.isArray(x))return'['+x.map(function(v){return typeof v==='string'?"'"+v+"'":fmtVal(v)}).join(', ')+']';
+  return String(x);
 }
 
 function smartSplit(s,delim){
-  let parts=[],depth=0,cur='',inStr=false,strCh='';
-  for(let c of s){
+  var parts=[],depth=0,cur='',inStr=false,strCh='';
+  for(var ci=0;ci<s.length;ci++){
+    var c=s[ci];
     if(inStr){cur+=c;if(c===strCh)inStr=false;continue;}
     if(c==='"'||c==="'"){inStr=true;strCh=c;cur+=c;continue;}
     if(c==='('||c==='['||c==='{')depth++;
@@ -178,300 +153,407 @@ function smartSplit(s,delim){
   return parts;
 }
 
+function findTopLevel(expr,targets){
+  // Find the rightmost top-level occurrence of any target string
+  var depth=0,inStr=false,strCh='';
+  for(var j=expr.length-1;j>=0;j--){
+    var c=expr[j];
+    // Simple string tracking (backwards is tricky, so we check pairs)
+    if(c===')'||c===']')depth++;
+    if(c==='('||c==='[')depth--;
+    if(depth===0){
+      for(var ti=0;ti<targets.length;ti++){
+        var t=targets[ti];
+        if(expr.slice(j,j+t.length)===t){
+          return {pos:j,op:t};
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function findTopLevelLeft(expr,targets){
+  var depth=0;
+  for(var j=0;j<expr.length;j++){
+    var c=expr[j];
+    if(c==='('||c==='[')depth++;
+    if(c===')'||c===']')depth--;
+    if(depth===0){
+      for(var ti=0;ti<targets.length;ti++){
+        var t=targets[ti];
+        if(expr.slice(j,j+t.length)===t){
+          return {pos:j,op:t};
+        }
+      }
+    }
+  }
+  return null;
+}
+
 function evalExpr(expr){
   expr=expr.trim();
   if(expr==='')return '';
 
   // f-string
-  if(expr.match(/^f['"]/)){
-    let q=expr[1];let s=expr.slice(2,-1);
-    return s.replace(/\{([^}:]+)(?::([^}]*))?\}/g,(_,e,fmt)=>{
-      let v=evalExpr(e);
-      if(fmt&&fmt.includes('f')){ let d=parseInt(fmt.replace('.','').replace('f',''))||2; return Number(v).toFixed(d);}
-      if(fmt&&fmt.includes('d'))return String(Math.floor(Number(v))).padStart(parseInt(fmt)||1,'0');
+  if(/^f['"]/.test(expr)){
+    var s=expr.slice(2,-1);
+    return s.replace(/\{([^}:]+)(?::([^}]*))?\}/g,function(_,e,fmt){
+      var v=evalExpr(e);
+      if(fmt&&fmt.indexOf('f')>=0){var d=parseInt(fmt.replace('.','').replace('f',''))||2;return Number(v).toFixed(d);}
       return v;
     });
   }
 
-  // string literal
-  if((expr[0]==='"'&&expr[expr.length-1]==='"')||(expr[0]==="'"&&expr[expr.length-1]==="'"))return expr.slice(1,-1);
-  if(!isNaN(expr)&&expr!=='')return Number(expr);
-  if(expr==='True')return true;if(expr==='False')return false;if(expr==='None')return null;
-
-  // list literal
-  if(expr[0]==='['&&expr[expr.length-1]===']'){
-    if(expr==='[]')return [];
-    return smartSplit(expr.slice(1,-1),',').map(x=>evalExpr(x.trim()));
+  // string literal - must be a single complete string
+  if(expr[0]==='"'||expr[0]==="'"){
+    var sq=expr[0],si=1;
+    while(si<expr.length&&expr[si]!==sq)si++;
+    if(si===expr.length-1)return expr.slice(1,-1);
   }
+  // number
+  if(expr!==''&&!isNaN(expr))return Number(expr);
+  if(expr==='True')return true;
+  if(expr==='False')return false;
+  if(expr==='None')return null;
+
+  // list literal - verify matching brackets
+  if(expr[0]==='['){
+    var ld=0;
+    for(var li=0;li<expr.length;li++){if(expr[li]==='[')ld++;if(expr[li]===']')ld--;if(ld===0&&li===expr.length-1){
+      if(expr==='[]')return[];
+      return smartSplit(expr.slice(1,-1),',').map(function(x){return evalExpr(x.trim())});
+    }if(ld===0&&li<expr.length-1)break;}
+  }
+
+  // Check for function call FIRST (before operators)
+  var fcMatch=expr.match(/^(\w+)\(([\s\S]*)\)$/);
+  if(fcMatch){
+    // Verify balanced parens in args
+    var d=0,ok=true;
+    for(var ci=0;ci<fcMatch[2].length;ci++){if(fcMatch[2][ci]==='(')d++;if(fcMatch[2][ci]===')')d--;if(d<0){ok=false;break;}}
+    if(ok&&d===0){
+      var fn=fcMatch[1],argsStr=fcMatch[2];
+      var args=argsStr.trim()===''?[]:smartSplit(argsStr,',').map(function(a){return a.trim()});
+      var r=doCall(fn,args);
+      if(r!==undefined)return r;
+    }
+  }
+
+  // Method call: obj.method(args)
+  {var md=0;
+  for(var j=expr.length-1;j>=0;j--){
+    if(expr[j]===')')md++;if(expr[j]==='(')md--;
+    if(md===0&&expr[j]==='.'&&j>0){
+      var rest=expr.slice(j+1);
+      var mm=rest.match(/^(\w+)\(([\s\S]*)\)$/);
+      if(mm){
+        var obj=evalExpr(expr.slice(0,j)),meth=mm[1],mArgsStr=mm[2];
+        var mArgs=mArgsStr.trim()===''?[]:smartSplit(mArgsStr,',').map(function(a){return evalExpr(a.trim())});
+        var mr=doMethod(obj,meth,mArgs);
+        if(mr!==undefined)return mr;
+      }
+      break;
+    }
+  }}
+
+  // in / not in at top level (with string skipping)
+  {var ind=0,inq=false,iqc='';
+  for(var j=0;j<expr.length;j++){
+    var ch=expr[j];
+    if(!inq&&(ch==='"'||ch==="'")){inq=true;iqc=ch;continue;}
+    if(inq&&ch===iqc){inq=false;continue;}
+    if(inq)continue;
+    if(ch==='('||ch==='[')ind++;if(ch===')'||ch===']')ind--;
+    if(ind===0&&expr.slice(j,j+8)===' not in '){
+      var nv=evalExpr(expr.slice(0,j)),nc=evalExpr(expr.slice(j+8));
+      return Array.isArray(nc)?!nc.includes(nv):!String(nc).includes(String(nv));
+    }
+    if(ind===0&&expr.slice(j,j+4)===' in '){
+      var iv=evalExpr(expr.slice(0,j)),ic=evalExpr(expr.slice(j+4));
+      return Array.isArray(ic)?ic.includes(iv):String(ic).includes(String(iv));
+    }
+  }}
+
+
+  // Indexing: obj[idx] - only if [ is preceded by identifier/]/}/)
+  {var id2=0;
+  for(var j=expr.length-1;j>=0;j--){
+    if(expr[j]===']')id2++;
+    if(expr[j]==='['){id2--;if(id2===0&&j>0&&/[\w\]\)\}]/.test(expr[j-1])){
+      var oe=expr.slice(0,j),ie=expr.slice(j+1,-1);
+      var obj=evalExpr(oe);
+      if(ie.indexOf(':')>=0){
+        var pp=ie.split(':');
+        var st=pp[0].trim()?Number(evalExpr(pp[0])):0;
+        var en=pp[1]&&pp[1].trim()?Number(evalExpr(pp[1])):undefined;
+        return Array.isArray(obj)?obj.slice(st,en):String(obj).slice(st,en);
+      }
+      var idx=Number(evalExpr(ie));
+      if(idx<0)idx=(Array.isArray(obj)?obj.length:String(obj).length)+idx;
+      return Array.isArray(obj)?obj[idx]:String(obj)[idx];
+    }}
+  }}
 
   // not
-  if(expr.startsWith('not ')){return !evalExpr(expr.slice(4));}
+  if(expr.indexOf('not ')===0)return !evalExpr(expr.slice(4));
 
-  // and/or
-  if(expr.includes(' and ')){let p=expr.split(' and ');return evalExpr(p[0])&&evalExpr(p.slice(1).join(' and '));}
-  if(expr.includes(' or ')){let p=expr.split(' or ');return evalExpr(p[0])||evalExpr(p.slice(1).join(' or '));}
+  // and/or at top level
+  {var f=findTopLevelLeft(expr,[' and ',' or ']);
+  if(f){
+    if(f.op===' and ')return evalExpr(expr.slice(0,f.pos))&&evalExpr(expr.slice(f.pos+5));
+    if(f.op===' or ')return evalExpr(expr.slice(0,f.pos))||evalExpr(expr.slice(f.pos+4));
+  }}
 
-  // comparisons
-  for(let op of ['==','!=','>=','<=','>','<']){
-    let idx=expr.indexOf(op);
-    if(idx>0&&expr[idx-1]!=='!'&&expr[idx-1]!=='>'&&expr[idx-1]!=='<'){
-      let l=evalExpr(expr.slice(0,idx)),r=evalExpr(expr.slice(idx+op.length));
-      if(op==='==')return l==r;if(op==='!=')return l!=r;
-      if(op==='>=')return l>=r;if(op==='<=')return l<=r;
-      if(op==='>')return l>r;if(op==='<')return l<r;
-    }
-  }
-
-  // in operator
-  if(expr.includes(' in ')){
-    let p=expr.split(' in ');
-    let val=evalExpr(p[0]),container=evalExpr(p.slice(1).join(' in '));
-    if(Array.isArray(container))return container.includes(val);
-    if(typeof container==='string')return container.includes(val);
-    return false;
-  }
-
-  // +- (not inside strings)
-  let depth=0,lastPlus=-1,lastMinus=-1;
-  for(let j=expr.length-1;j>=0;j--){
-    let c=expr[j];
-    if(c===')'||c===']')depth++;if(c==='('||c==='[')depth--;
-    if(depth===0&&c==='+'&&j>0){lastPlus=j;break;}
-    if(depth===0&&c==='-'&&j>0&&expr[j-1]!==' '&&!'+-*/%('.includes(expr[j-1])){lastMinus=j;break;}
-  }
-  let splitAt=Math.max(lastPlus,lastMinus);
-  if(splitAt>0){
-    let l=evalExpr(expr.slice(0,splitAt)),r=evalExpr(expr.slice(splitAt+1));
-    if(expr[splitAt]==='+'){
-      if(typeof l==='string'||typeof r==='string')return String(l)+String(r);
-      return Number(l)+Number(r);
-    }
-    return Number(l)-Number(r);
-  }
-
-  // * / // % **
-  depth=0;
-  for(let j=expr.length-1;j>=0;j--){
-    let c=expr[j];
-    if(c===')'||c===']')depth++;if(c==='('||c==='[')depth--;
-    if(depth===0){
-      if(c==='*'&&j>0&&expr[j-1]!=='*'&&(j+1>=expr.length||expr[j+1]!=='*')){
-        let l=evalExpr(expr.slice(0,j)),r=evalExpr(expr.slice(j+1));
-        if(typeof l==='string')return l.repeat(Number(r));
-        if(typeof r==='string')return r.repeat(Number(l));
-        return Number(l)*Number(r);
+  // Comparisons at top level (scan left to right, skip strings)
+  {var cd=0,cq=false,cqc='';
+  for(var j=0;j<expr.length;j++){
+    var ch=expr[j];
+    if(!cq&&(ch==='"'||ch==="'")){cq=true;cqc=ch;continue;}
+    if(cq&&ch===cqc){cq=false;continue;}
+    if(cq)continue;
+    if(ch==='('||ch==='[')cd++;if(ch===')'||ch===']')cd--;
+    if(cd===0){
+      var ops=[{s:'==',l:2},{s:'!=',l:2},{s:'>=',l:2},{s:'<=',l:2},{s:'>',l:1},{s:'<',l:1}];
+      for(var oi=0;oi<ops.length;oi++){
+        var o=ops[oi];
+        if(expr.slice(j,j+o.l)===o.s){
+          if(o.s==='='&&j>0&&'!><'.indexOf(expr[j-1])>=0)continue;
+          if(o.s==='>'&&j>0&&(expr[j-1]==='='||expr[j-1]==='>'||expr[j-1]==='<'))continue;
+          if(o.s==='<'&&j>0&&(expr[j-1]==='='||expr[j-1]==='<'))continue;
+          if((o.s==='>'||o.s==='<')&&j>0&&expr[j-1]==='*')continue;
+          var cl=evalExpr(expr.slice(0,j)),cr=evalExpr(expr.slice(j+o.l));
+          if(o.s==='==')return cl==cr;if(o.s==='!=')return cl!=cr;
+          if(o.s==='>=')return cl>=cr;if(o.s==='<=')return cl<=cr;
+          if(o.s==='>')return cl>cr;if(o.s==='<')return cl<cr;
+        }
       }
-      if(c==='/'&&j>0&&expr[j-1]!=='/'&&(j+1>=expr.length||expr[j+1]!=='/')){
+    }
+  }}
+
+  // +/- at top level (right to left, skip strings)
+  {var pd=0,pq=false,pqc='';
+  for(var j=expr.length-1;j>=0;j--){
+    var ch=expr[j];
+    if(!pq&&(ch==='"'||ch==="'")){pq=true;pqc=ch;continue;}
+    if(pq&&ch===pqc){pq=false;continue;}
+    if(pq)continue;
+    if(ch===')'||ch===']')pd++;if(ch==='('||ch==='[')pd--;
+    if(pd===0){
+      if(ch==='+'&&j>0){
+        var pl=evalExpr(expr.slice(0,j)),pr=evalExpr(expr.slice(j+1));
+        if(typeof pl==='string'||typeof pr==='string')return String(pl)+String(pr);
+        if(Array.isArray(pl)&&Array.isArray(pr))return pl.concat(pr);
+        return Number(pl)+Number(pr);
+      }
+      if(ch==='-'&&j>0&&'+-*/%('.indexOf(expr[j-1])<0){
+        return Number(evalExpr(expr.slice(0,j)))-Number(evalExpr(expr.slice(j+1)));
+      }
+    }
+  }}
+
+  // * / // % ** at top level (right to left, skip strings)
+  {var md2=0,mq=false,mqc='';
+  for(var j=expr.length-1;j>=0;j--){
+    var ch=expr[j];
+    if(!mq&&(ch==='"'||ch==="'")){mq=true;mqc=ch;continue;}
+    if(mq&&ch===mqc){mq=false;continue;}
+    if(mq)continue;
+    if(ch===')'||ch===']')md2++;if(ch==='('||ch==='[')md2--;
+    if(md2===0){
+      if(expr[j]==='*'&&j>0){
+        if(expr[j-1]==='*'){
+          var pl=evalExpr(expr.slice(0,j-1)),pr=evalExpr(expr.slice(j+1));
+          return Math.pow(Number(pl),Number(pr));
+        }
+        if(j+1<expr.length&&expr[j+1]==='*')continue;
+        var pl=evalExpr(expr.slice(0,j)),pr=evalExpr(expr.slice(j+1));
+        if(typeof pl==='string')return pl.repeat(Number(pr));
+        if(typeof pr==='string')return pr.repeat(Number(pl));
+        if(Array.isArray(pl)){var rr=[];for(var ri=0;ri<Number(pr);ri++)rr=rr.concat(pl);return rr;}
+        if(Array.isArray(pr)){var rr=[];for(var ri=0;ri<Number(pl);ri++)rr=rr.concat(pr);return rr;}
+        return Number(pl)*Number(pr);
+      }
+      if(expr[j]==='/'&&j>0){
+        if(expr[j-1]==='/'){
+          return Math.floor(Number(evalExpr(expr.slice(0,j-1)))/Number(evalExpr(expr.slice(j+1))));
+        }
+        if(j+1<expr.length&&expr[j+1]==='/')continue;
         return Number(evalExpr(expr.slice(0,j)))/Number(evalExpr(expr.slice(j+1)));
       }
-      if(c==='/'&&j>0&&expr[j-1]==='/'){
-        return Math.floor(Number(evalExpr(expr.slice(0,j-1)))/Number(evalExpr(expr.slice(j+1))));
-      }
-      if(c==='%'&&j>0){
+      if(expr[j]==='%'&&j>0){
         return Number(evalExpr(expr.slice(0,j)))%Number(evalExpr(expr.slice(j+1)));
       }
     }
-  }
-  // **
-  if(expr.includes('**')){
-    let idx=expr.lastIndexOf('**');
-    return Math.pow(Number(evalExpr(expr.slice(0,idx))),Number(evalExpr(expr.slice(idx+2))));
-  }
+  }}
 
-  // parens
-  if(expr[0]==='('&&expr[expr.length-1]===')'){return evalExpr(expr.slice(1,-1));}
+  // Parenthesized expression
+  if(expr[0]==='('&&expr[expr.length-1]===')')return evalExpr(expr.slice(1,-1));
 
-  // function calls
-  let fnMatch=expr.match(/^(\w+)\((.*)?\)$/s);
-  if(fnMatch){
-    let fn=fnMatch[1],argsStr=fnMatch[2]||'';
-    let args=argsStr?smartSplit(argsStr,',').map(a=>a.trim()):[];
-
-    if(fn==='print'){
-      let sep=' ',end='\n';
-      let printArgs=[];
-      for(let a of args){
-        if(a.startsWith('sep=')){sep=evalExpr(a.slice(4));}
-        else if(a.startsWith('end=')){end=evalExpr(a.slice(4));}
-        else printArgs.push(evalExpr(a));
-      }
-      output+=printArgs.map(x=>x===null?'None':x===true?'True':x===false?'False':Array.isArray(x)?JSON.stringify(x).replace(/"/g,"'"):String(x)).join(sep)+end;
-      return;
-    }
-    if(fn==='input'){
-      let prompt=args.length?evalExpr(args[0]):'';
-      output+=prompt;
-      if(inputIdx<inputVals.length)return String(inputVals[inputIdx++]);
-      return '';
-    }
-    if(fn==='int')return parseInt(evalExpr(args[0]));
-    if(fn==='float')return parseFloat(evalExpr(args[0]));
-    if(fn==='str')return String(evalExpr(args[0]));
-    if(fn==='type'){
-      let v=evalExpr(args[0]);
-      if(typeof v==='number'&&Number.isInteger(v))return "<class 'int'>";
-      if(typeof v==='number')return "<class 'float'>";
-      if(typeof v==='string')return "<class 'str'>";
-      if(typeof v==='boolean')return "<class 'bool'>";
-      if(Array.isArray(v))return "<class 'list'>";
-      return "&lt;class 'NoneType'&gt;";
-    }
-    if(fn==='len'){let v=evalExpr(args[0]);return Array.isArray(v)?v.length:String(v).length;}
-    if(fn==='max'){let v=evalExpr(args[0]);return Array.isArray(v)?Math.max(...v):Math.max(...args.map(a=>Number(evalExpr(a))));}
-    if(fn==='min'){let v=evalExpr(args[0]);return Array.isArray(v)?Math.min(...v):Math.min(...args.map(a=>Number(evalExpr(a))));}
-    if(fn==='sum'){let v=evalExpr(args[0]);return Array.isArray(v)?v.reduce((a,b)=>a+b,0):0;}
-    if(fn==='abs')return Math.abs(Number(evalExpr(args[0])));
-    if(fn==='round'){let v=Number(evalExpr(args[0])),d=args[1]?Number(evalExpr(args[1])):0;return Number(v.toFixed(d));}
-    if(fn==='range'){
-      let a=args.map(x=>Number(evalExpr(x)));
-      let start=0,stop,step=1;
-      if(a.length===1)stop=a[0];
-      else if(a.length===2){start=a[0];stop=a[1];}
-      else{start=a[0];stop=a[1];step=a[2];}
-      let r=[];for(let x=start;step>0?x<stop:x>stop;x+=step)r.push(x);
-      return r;
-    }
-    if(fn==='list'){if(args.length===0)return [];return Array.from(evalExpr(args[0]));}
-    if(fn==='tuple'){if(args.length===0)return [];return Array.from(evalExpr(args[0]));}
-    if(fn==='sorted'){let v=[...evalExpr(args[0])];v.sort((a,b)=>a>b?1:a<b?-1:0);return v;}
-    if(fn==='bool'){let v=evalExpr(args[0]);return !!v;}
-    // user-defined function
-    if(vars['__fn_'+fn]){
-      let fdef=vars['__fn_'+fn];
-      let oldVars={...vars};
-      for(let pi=0;pi<fdef.params.length;pi++){vars[fdef.params[pi]]=evalExpr(args[pi]);}
-      let ret=execBlock(fdef.body,0);
-      vars=oldVars;
-      return ret;
-    }
-  }
-
-  // method calls: obj.method(args)
-  let mMatch=expr.match(/^(.+?)\.(\w+)\((.*)\)$/s);
-  if(mMatch){
-    let obj=evalExpr(mMatch[1]),method=mMatch[2],argsStr=mMatch[3];
-    let args=argsStr?smartSplit(argsStr,',').map(a=>evalExpr(a.trim())):[];
-    if(Array.isArray(obj)){
-      if(method==='append'){obj.push(args[0]);return;}
-      if(method==='extend'){obj.push(...args[0]);return;}
-      if(method==='pop'){return args.length?obj.splice(args[0],1)[0]:obj.pop();}
-      if(method==='remove'){let idx=obj.indexOf(args[0]);if(idx>-1)obj.splice(idx,1);return;}
-      if(method==='sort'){obj.sort((a,b)=>a>b?1:a<b?-1:0);return;}
-      if(method==='reverse'){obj.reverse();return;}
-      if(method==='copy'){return [...obj];}
-      if(method==='index'){return obj.indexOf(args[0]);}
-      if(method==='count'){return obj.filter(x=>x===args[0]).length;}
-      if(method==='insert'){obj.splice(args[0],0,args[1]);return;}
-    }
-    if(typeof obj==='string'){
-      if(method==='split'){return args.length?obj.split(args[0]):obj.split(/\s+/);}
-      if(method==='join'){return args[0].join(obj);}
-      if(method==='upper')return obj.toUpperCase();
-      if(method==='lower')return obj.toLowerCase();
-      if(method==='strip'||method==='trim')return obj.trim();
-      if(method==='replace')return obj.replaceAll(args[0],args[1]);
-      if(method==='startswith')return obj.startsWith(args[0]);
-      if(method==='endswith')return obj.endsWith(args[0]);
-      if(method==='find')return obj.indexOf(args[0]);
-      if(method==='count')return obj.split(args[0]).length-1;
-    }
-  }
-
-  // indexing: var[idx] or var[start:end]
-  let idxMatch=expr.match(/^(.+?)\[(.+)\]$/);
-  if(idxMatch){
-    let obj=evalExpr(idxMatch[1]),idx=idxMatch[2];
-    if(idx.includes(':')){
-      let parts=idx.split(':');
-      let start=parts[0]?Number(evalExpr(parts[0])):0;
-      let end=parts[1]?Number(evalExpr(parts[1])):undefined;
-      if(Array.isArray(obj))return obj.slice(start,end);
-      return String(obj).slice(start,end);
-    }
-    let i=Number(evalExpr(idx));
-    if(i<0)i=Array.isArray(obj)?obj.length+i:String(obj).length+i;
-    return Array.isArray(obj)?obj[i]:String(obj)[i];
-  }
-
-  // variable
+  // Variable lookup
   if(vars.hasOwnProperty(expr))return vars[expr];
-  // negative number
   if(expr[0]==='-'&&!isNaN(expr.slice(1)))return Number(expr);
-
   throw new Error("NameError: name '"+expr+"' is not defined");
 }
 
+function doCall(fn,args){
+  if(fn==='print'){
+    var sep=' ',end='\n',pa=[];
+    for(var i=0;i<args.length;i++){
+      if(args[i].indexOf('sep=')===0)sep=evalExpr(args[i].slice(4));
+      else if(args[i].indexOf('end=')===0)end=evalExpr(args[i].slice(4));
+      else pa.push(evalExpr(args[i]));
+    }
+    output+=pa.map(fmtPrint).join(sep)+end;return '';
+  }
+  if(fn==='input'){
+    var prompt=args.length?evalExpr(args[0]):'';
+    output+=prompt;
+    return inputIdx<inputVals.length?String(inputVals[inputIdx++]):'';
+  }
+  if(fn==='int')return parseInt(evalExpr(args[0]));
+  if(fn==='float')return parseFloat(evalExpr(args[0]));
+  if(fn==='str')return String(evalExpr(args[0]));
+  if(fn==='type'){
+    var v=evalExpr(args[0]);
+    if(typeof v==='number'&&Number.isInteger(v))return "<class 'int'>";
+    if(typeof v==='number')return "<class 'float'>";
+    if(typeof v==='string')return "<class 'str'>";
+    if(typeof v==='boolean')return "<class 'bool'>";
+    if(Array.isArray(v))return "<class 'list'>";
+    return "<class 'NoneType'>";
+  }
+  if(fn==='len'){var v=evalExpr(args[0]);return Array.isArray(v)?v.length:String(v).length;}
+  if(fn==='max'){var v=evalExpr(args[0]);return Array.isArray(v)?Math.max.apply(null,v):Math.max.apply(null,args.map(function(a){return Number(evalExpr(a))}));}
+  if(fn==='min'){var v=evalExpr(args[0]);return Array.isArray(v)?Math.min.apply(null,v):Math.min.apply(null,args.map(function(a){return Number(evalExpr(a))}));}
+  if(fn==='sum'){var v=evalExpr(args[0]);return Array.isArray(v)?v.reduce(function(a,b){return a+b},0):0;}
+  if(fn==='abs')return Math.abs(Number(evalExpr(args[0])));
+  if(fn==='round'){var v=Number(evalExpr(args[0])),d=args[1]?Number(evalExpr(args[1])):0;return Number(v.toFixed(d));}
+  if(fn==='range'){
+    var a=args.map(function(x){return Number(evalExpr(x))});
+    var start=0,stop,step=1;
+    if(a.length===1)stop=a[0];else if(a.length===2){start=a[0];stop=a[1];}else{start=a[0];stop=a[1];step=a[2];}
+    var r=[];for(var x=start;step>0?x<stop:x>stop;x+=step)r.push(x);return r;
+  }
+  if(fn==='list'){if(args.length===0)return[];var v=evalExpr(args[0]);if(typeof v==='string')return v.split('');return Array.from(v);}
+  if(fn==='tuple'){if(args.length===0)return[];return Array.from(evalExpr(args[0]));}
+  if(fn==='sorted'){var v=evalExpr(args[0]).slice();v.sort(function(a,b){return a>b?1:a<b?-1:0});return v;}
+  if(fn==='bool'){return !!evalExpr(args[0]);}
+  if(fn==='enumerate'){var v=evalExpr(args[0]),s=args[1]?Number(evalExpr(args[1])):0;return v.map(function(x,i){return[i+s,x]});}
+  // user-defined function
+  if(vars['__fn_'+fn]){
+    var fdef=vars['__fn_'+fn],oldVars={};
+    for(var k in vars)oldVars[k]=vars[k];
+    for(var pi=0;pi<fdef.params.length;pi++)vars[fdef.params[pi]]=evalExpr(args[pi]);
+    var ret=execBlock(fdef.body,0);
+    vars=oldVars;return ret;
+  }
+  return undefined;
+}
+
+function doMethod(obj,method,args){
+  if(Array.isArray(obj)){
+    if(method==='append'){obj.push(args[0]);return '';}
+    if(method==='extend'){for(var i=0;i<args[0].length;i++)obj.push(args[0][i]);return '';}
+    if(method==='pop'){return args.length?obj.splice(args[0],1)[0]:obj.pop();}
+    if(method==='remove'){var idx=obj.indexOf(args[0]);if(idx>-1)obj.splice(idx,1);return '';}
+    if(method==='sort'){obj.sort(function(a,b){return a>b?1:a<b?-1:0});return '';}
+    if(method==='reverse'){obj.reverse();return '';}
+    if(method==='copy'){return obj.slice();}
+    if(method==='index'){return obj.indexOf(args[0]);}
+    if(method==='count'){var c=0;for(var i=0;i<obj.length;i++)if(obj[i]===args[0])c++;return c;}
+    if(method==='insert'){obj.splice(args[0],0,args[1]);return '';}
+  }
+  if(typeof obj==='string'){
+    if(method==='split'){return args.length?obj.split(args[0]):obj.split(/\s+/);}
+    if(method==='join'){return args[0].join(obj);}
+    if(method==='upper')return obj.toUpperCase();
+    if(method==='lower')return obj.toLowerCase();
+    if(method==='strip'||method==='trim')return obj.trim();
+    if(method==='replace')return obj.split(args[0]).join(args[1]||'');
+    if(method==='startswith')return obj.indexOf(args[0])===0;
+    if(method==='endswith')return obj.indexOf(args[0])===obj.length-args[0].length;
+    if(method==='find')return obj.indexOf(args[0]);
+    if(method==='count'){var c=0,p=0;while((p=obj.indexOf(args[0],p))>=0){c++;p+=args[0].length;}return c;}
+  }
+  return undefined;
+}
+
 function execBlock(lines,startI){
-  let i=startI;
+  var i=startI||0;
   while(i<lines.length){
-    let line=lines[i].trim();
-    if(line===''||line.startsWith('#')){i++;continue;}
+    var line=lines[i];
+    var trimmed=line.replace(/^\s+/,'');
+    if(trimmed===''||trimmed[0]==='#'){i++;continue;}
 
     // def
-    if(line.startsWith('def ')){
-      let dm=line.match(/def\s+(\w+)\(([^)]*)\):/);
+    if(trimmed.indexOf('def ')===0){
+      var dm=trimmed.match(/def\s+(\w+)\(([^)]*)\):/);
       if(dm){
-        let fname=dm[1],params=dm[2]?dm[2].split(',').map(p=>p.trim()):[];
-        let body=[];i++;
-        while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
+        var fname=dm[1],params=dm[2]?dm[2].split(',').map(function(p){return p.trim()}):[];
+        var body=[];i++;
+        while(i<lines.length&&(lines[i].length===0||lines[i][0]===' '||lines[i][0]==='\t')){
           body.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
         }
-        vars['__fn_'+fname]={params,body};continue;
+        vars['__fn_'+fname]={params:params,body:body};continue;
       }
     }
 
     // return
-    if(line.startsWith('return ')){return evalExpr(line.slice(7));}
-    if(line==='return')return null;
+    if(trimmed.indexOf('return ')===0)return evalExpr(trimmed.slice(7));
+    if(trimmed==='return')return null;
 
     // if/elif/else
-    if(line.startsWith('if ')||line.startsWith('elif ')){
-      let cond=line.replace(/^(?:el)?if\s+/,'').replace(/:$/,'');
-      let condVal=evalExpr(cond);
+    if(trimmed.indexOf('if ')===0||trimmed.indexOf('elif ')===0){
+      var isElif=trimmed.indexOf('elif ')===0;
+      var cond=trimmed.replace(/^(el)?if\s+/,'').replace(/:$/,'');
+      var condVal=evalExpr(cond);
       i++;
-      let block=[];
-      while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
-        if(lines[i].trim()!=='')block.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
+      var block=[];
+      while(i<lines.length&&lines[i].length>0&&(lines[i][0]===' '||lines[i][0]==='\t')){
+        block.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
       }
       if(condVal){
-        let ret=execBlock(block,0);
-        // skip remaining elif/else
-        while(i<lines.length&&(lines[i].trim().startsWith('elif ')||lines[i].trim().startsWith('else:'))){
-          i++;while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()===''))i++;
+        var ret=execBlock(block,0);
+        while(i<lines.length){
+          var nt=lines[i].replace(/^\s+/,'');
+          if(nt.indexOf('elif ')===0||nt==='else:'){
+            i++;while(i<lines.length&&lines[i].length>0&&(lines[i][0]===' '||lines[i][0]==='\t'))i++;
+          }else break;
         }
         if(ret!==undefined)return ret;
-      } else {
-        // check next elif/else
-        if(i<lines.length&&lines[i].trim().startsWith('elif ')){continue;}
-        if(i<lines.length&&lines[i].trim()==='else:'){
-          i++;let block2=[];
-          while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
-            if(lines[i].trim()!=='')block2.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
+      }else{
+        if(i<lines.length&&lines[i].replace(/^\s+/,'').indexOf('elif ')===0)continue;
+        if(i<lines.length&&lines[i].replace(/^\s+/,'')==='else:'){
+          i++;var block2=[];
+          while(i<lines.length&&lines[i].length>0&&(lines[i][0]===' '||lines[i][0]==='\t')){
+            block2.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
           }
-          let ret=execBlock(block2,0);
+          var ret=execBlock(block2,0);
           if(ret!==undefined)return ret;
         }
       }
       continue;
     }
-    if(line==='else:'){i++;while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()===''))i++;continue;}
+    if(trimmed==='else:'){i++;while(i<lines.length&&lines[i].length>0&&(lines[i][0]===' '||lines[i][0]==='\t'))i++;continue;}
 
-    // for loop
-    if(line.startsWith('for ')){
-      let fm=line.match(/for\s+(.+)\s+in\s+(.+):/);
+    // for
+    if(trimmed.indexOf('for ')===0){
+      var fm=trimmed.match(/for\s+(.+)\s+in\s+(.+):/);
       if(fm){
-        let varName=fm[1].trim(),iterExpr=fm[2].trim();
-        i++;let block=[];
-        while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
-          if(lines[i].trim()!=='')block.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
+        var varName=fm[1].trim(),iterExpr=fm[2].trim();
+        i++;var block=[];
+        while(i<lines.length&&lines[i].length>0&&(lines[i][0]===' '||lines[i][0]==='\t')){
+          block.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
         }
-        let iterable=evalExpr(iterExpr);
+        var iterable=evalExpr(iterExpr);
         if(Array.isArray(iterable)){
-          for(let item of iterable){
-            if(varName.includes(',')){
-              let names=varName.split(',').map(n=>n.trim());
-              if(Array.isArray(item)){for(let ni=0;ni<names.length;ni++)vars[names[ni]]=item[ni];}
-            }else{vars[varName]=item;}
+          for(var ii=0;ii<iterable.length;ii++){
+            var item=iterable[ii];
+            if(varName.indexOf(',')>=0){
+              var names=varName.split(',').map(function(n){return n.trim()});
+              if(Array.isArray(item)){for(var ni=0;ni<names.length;ni++)vars[names[ni]]=item[ni];}
+            }else vars[varName]=item;
             execBlock(block,0);
           }
         }
@@ -479,35 +561,37 @@ function execBlock(lines,startI){
       continue;
     }
 
-    // while loop
-    if(line.startsWith('while ')){
-      let cond=line.replace(/^while\s+/,'').replace(/:$/,'');
-      i++;let block=[];
-      while(i<lines.length&&(lines[i].startsWith('    ')||lines[i].startsWith('\t')||lines[i].trim()==='')){
-        if(lines[i].trim()!=='')block.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
+    // while
+    if(trimmed.indexOf('while ')===0){
+      var cond=trimmed.replace(/^while\s+/,'').replace(/:$/,'');
+      i++;var block=[];
+      while(i<lines.length&&lines[i].length>0&&(lines[i][0]===' '||lines[i][0]==='\t')){
+        block.push(lines[i].replace(/^    /,'').replace(/^\t/,''));i++;
       }
-      let limit=1000,count=0;
-      while(evalExpr(cond)&&count<limit){execBlock(block,0);count++;}
+      var limit=1000,cnt=0;
+      while(evalExpr(cond)&&cnt<limit){execBlock(block,0);cnt++;}
       continue;
     }
 
     // del
-    if(line.startsWith('del ')){
-      let target=line.slice(4).trim();
-      let dm=target.match(/^(.+)\[(.+)\]$/);
-      if(dm){let obj=evalExpr(dm[1]),idx=Number(evalExpr(dm[2]));if(Array.isArray(obj))obj.splice(idx,1);}
+    if(trimmed.indexOf('del ')===0){
+      var target=trimmed.slice(4).trim();
+      var dm2=target.match(/^(.+)\[(.+)\]$/);
+      if(dm2){var obj=evalExpr(dm2[1]),idx=Number(evalExpr(dm2[2]));if(Array.isArray(obj))obj.splice(idx,1);}
       else delete vars[target];
       i++;continue;
     }
 
-    // assignment (including augmented)
-    let augOps=['+=','-=','*=','//=','/=','%=','**='];
-    let foundAug=false;
-    for(let ao of augOps){
-      if(line.includes(ao)){
-        let p=line.split(ao);let vn=p[0].trim(),val=evalExpr(p.slice(1).join(ao).trim());
-        let cur=vars[vn];
-        if(ao==='+='){if(typeof cur==='string')vars[vn]=cur+val;else vars[vn]=Number(cur)+Number(val);}
+    // Augmented assignment
+    var augOps=['+=','-=','*=','//=','/=','%=','**='];
+    var foundAug=false;
+    for(var ai=0;ai<augOps.length;ai++){
+      var ao=augOps[ai];
+      var aoIdx=trimmed.indexOf(ao);
+      if(aoIdx>0){
+        var vn=trimmed.slice(0,aoIdx).trim(),val=evalExpr(trimmed.slice(aoIdx+ao.length).trim());
+        var cur=vars[vn];
+        if(ao==='+='){vars[vn]=typeof cur==='string'?cur+val:Number(cur)+Number(val);}
         else if(ao==='-=')vars[vn]=Number(cur)-Number(val);
         else if(ao==='*=')vars[vn]=Number(cur)*Number(val);
         else if(ao==='//=')vars[vn]=Math.floor(Number(cur)/Number(val));
@@ -519,32 +603,36 @@ function execBlock(lines,startI){
     }
     if(foundAug){i++;continue;}
 
-    // multiple assignment with semicolons
-    if(line.includes(';')){
-      let stmts=line.split(';');
-      for(let stmt of stmts){
-        stmt=stmt.trim();
-        if(stmt.includes('=')){let p=stmt.split('=');vars[p[0].trim()]=evalExpr(p.slice(1).join('=').trim());}
-        else evalExpr(stmt);
+    // Multiple statements with ;
+    if(trimmed.indexOf(';')>=0){
+      var stmts=trimmed.split(';');
+      for(var si=0;si<stmts.length;si++){
+        var stmt=stmts[si].trim();if(!stmt)continue;
+        if(stmt.indexOf('=')>=0&&stmt.indexOf('==')<0){
+          var eqIdx=stmt.indexOf('=');
+          if(eqIdx>0&&'!><'.indexOf(stmt[eqIdx-1])<0&&stmt[eqIdx+1]!=='='){
+            vars[stmt.slice(0,eqIdx).trim()]=evalExpr(stmt.slice(eqIdx+1).trim());
+          }else evalExpr(stmt);
+        }else evalExpr(stmt);
       }
       i++;continue;
     }
 
-    // simple assignment or indexing assignment
-    if(line.includes('=')&&!line.includes('==')){
-      let eqIdx=line.indexOf('=');
-      if(eqIdx>0&&line[eqIdx-1]!=='!'&&line[eqIdx-1]!=='>'&&line[eqIdx-1]!=='<'&&line[eqIdx+1]!=='='){
-        let lhs=line.slice(0,eqIdx).trim(),rhs=line.slice(eqIdx+1).trim();
-        // tuple unpacking
-        if(lhs.includes(',')){
-          let names=lhs.split(',').map(n=>n.trim());
-          let val=evalExpr(rhs);
-          if(Array.isArray(val)){for(let ni=0;ni<names.length;ni++)vars[names[ni]]=val[ni];}
+    // Assignment
+    if(trimmed.indexOf('=')>=0&&trimmed.indexOf('==')<0){
+      var eqIdx=trimmed.indexOf('=');
+      if(eqIdx>0&&'!><'.indexOf(trimmed[eqIdx-1])<0&&trimmed[eqIdx+1]!=='='){
+        var lhs=trimmed.slice(0,eqIdx).trim(),rhs=trimmed.slice(eqIdx+1).trim();
+        // Tuple unpacking
+        if(lhs.indexOf(',')>=0){
+          var names=lhs.split(',').map(function(n){return n.trim()});
+          var val=evalExpr(rhs);
+          if(Array.isArray(val)){for(var ni=0;ni<names.length;ni++)vars[names[ni]]=val[ni];}
         }
-        // indexing assignment
+        // Index assignment
         else if(lhs.match(/\[.+\]$/)){
-          let im=lhs.match(/^(.+)\[(.+)\]$/);
-          let obj=evalExpr(im[1]),idx=Number(evalExpr(im[2])),val=evalExpr(rhs);
+          var im=lhs.match(/^(.+)\[(.+)\]$/);
+          var obj=evalExpr(im[1]),idx=Number(evalExpr(im[2])),val=evalExpr(rhs);
           if(Array.isArray(obj)){if(idx<0)idx=obj.length+idx;obj[idx]=val;}
         }
         else vars[lhs]=evalExpr(rhs);
@@ -552,42 +640,46 @@ function execBlock(lines,startI){
       }
     }
 
-    // expression statement
-    evalExpr(line);
+    // Expression statement
+    evalExpr(trimmed);
     i++;
   }
 }
 
+var lines=code.split('\n');
 execBlock(lines,0);
-outEl.innerHTML='<span class="ok">'+output.replace(/</g,'&lt;')+'</span>';
+outEl.innerHTML=output?'<span class="ok">'+output.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</span>':'<span style="color:#94a3b8">✅ تم التنفيذ بنجاح (لا يوجد مخرجات)</span>';
 }catch(e){
-  outEl.innerHTML='<span class="ok">'+output.replace(/</g,'&lt;')+'</span><span class="err">'+e.message.replace(/</g,'&lt;')+'</span>';
+  outEl.innerHTML=(output?'<span class="ok">'+output.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</span>':'')+('<span class="err">❌ '+e.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</span>');
 }
 }
 
+
 function makePyEditor(id,code,height){
 height=height||120;
-return `<div class="py-editor"><div class="py-bar"><span>🐍 Python Editor</span><button class="btn btn-gr" onclick="pyRun('ed_${id}','out_${id}')">▶ تشغيل</button></div><textarea id="ed_${id}" class="py-ta" style="min-height:${height}px">${code}</textarea><div id="out_${id}" class="py-out" style="color:#94a3b8">اضغط "تشغيل" لرؤية النتيجة</div></div>`;
+return '<div class="py-editor"><div class="py-bar"><span>🐍 Python Editor</span><button class="btn btn-gr" onclick="pyRun(\'ed_'+id+'\',\'out_'+id+'\')">▶ تشغيل</button></div><textarea id="ed_'+id+'" class="py-ta" style="min-height:'+height+'px">'+code+'</textarea><div id="out_'+id+'" class="py-out" style="color:#94a3b8">اضغط "تشغيل" لرؤية النتيجة</div></div>';
 }
 
 function makePyEditorWithInputs(id,code,inputs,height){
 height=height||120;
-let inputFields='';
-let inputNames=Object.keys(inputs);
-for(let name of inputNames){
-  inputFields+=`<div style="margin:.3rem 0;display:flex;align-items:center;gap:.4rem;font-size:.78rem"><label style="color:#fbbf24;min-width:100px">${inputs[name]}:</label><input id="inp_${id}_${name}" class="py-ta" style="min-height:auto;padding:.3rem;border:1px solid #333;border-radius:4px;flex:1" value=""></div>`;
+var inputFields='';
+var inputNames=Object.keys(inputs);
+for(var ni=0;ni<inputNames.length;ni++){
+  var name=inputNames[ni];
+  inputFields+='<div style="margin:.3rem 0;display:flex;align-items:center;gap:.4rem;font-size:.78rem"><label style="color:#fbbf24;min-width:100px">'+inputs[name]+':</label><input id="inp_'+id+'_'+name+'" class="py-ta" style="min-height:auto;padding:.3rem;border:1px solid #333;border-radius:4px;flex:1" value=""></div>';
 }
-return `<div class="py-editor"><div class="py-bar"><span>🐍 Python Editor (مع إدخال)</span><button class="btn btn-gr" onclick="runWithInputs('${id}',${JSON.stringify(inputNames)})">▶ تشغيل</button></div>${inputFields}<textarea id="ed_${id}" class="py-ta" style="min-height:${height}px">${code}</textarea><div id="out_${id}" class="py-out" style="color:#94a3b8">أدخل القيم ثم اضغط "تشغيل"</div></div>`;
+return '<div class="py-editor"><div class="py-bar"><span>🐍 Python Editor (مع إدخال)</span><button class="btn btn-gr" onclick="runWithInputs(\''+id+'\','+JSON.stringify(inputNames)+')">▶ تشغيل</button></div>'+inputFields+'<textarea id="ed_'+id+'" class="py-ta" style="min-height:'+height+'px">'+code+'</textarea><div id="out_'+id+'" class="py-out" style="color:#94a3b8">أدخل القيم ثم اضغط "تشغيل"</div></div>';
 }
 
 function runWithInputs(id,inputNames){
-let inputs={};
-for(let name of inputNames){
-  inputs[name]=document.getElementById('inp_'+id+'_'+name).value;
+var inputs={};
+for(var i=0;i<inputNames.length;i++){
+  var name=inputNames[i];
+  var el=document.getElementById('inp_'+id+'_'+name);
+  inputs[name]=el?el.value:'';
 }
 pyRun('ed_'+id,'out_'+id,inputs);
 }
-
 
 // ===== TAB 1: مقدمة في بايثون =====
 S.t1=`<div class="card">
@@ -973,11 +1065,11 @@ input() <b>دائماً ترجع نص str</b>!<br>
 </div>
 
 <h3>💻 تطبيقات عملية</h3>
-${makePyEditorWithInputs('calc','print("=== حاسبة بسيطة ===")\nnum1 = float(input("أدخل الرقم الأول: "))\nnum2 = float(input("أدخل الرقم الثاني: "))\nprint(f"{num1} + {num2} = {num1 + num2}")\nprint(f"{num1} - {num2} = {num1 - num2}")\nprint(f"{num1} * {num2} = {num1 * num2}")\nprint(f"{num1} / {num2} = {num1 / num2:.2f}")',{n1:'الرقم الأول',n2:'الرقم الثاني'},140)}
+${makePyEditorWithInputs('calc','print("=== حاسبة بسيطة ===")\nnum1 = float(input("أدخل الرقم الأول: "))\nnum2 = float(input("أدخل الرقم الثاني: "))\nprint(num1, "+", num2, "=", num1 + num2)\nprint(num1, "-", num2, "=", num1 - num2)\nprint(num1, "*", num2, "=", num1 * num2)\nprint(num1, "/", num2, "=", round(num1 / num2, 2))',{n1:'الرقم الأول',n2:'الرقم الثاني'},140)}
 
-${makePyEditorWithInputs('bmi','name = input("أدخل اسمك: ")\nweight = float(input("أدخل وزنك بالكيلو: "))\nheight = float(input("أدخل طولك بالمتر: "))\nbmi = weight / (height ** 2)\nprint(f"مرحباً {name}")\nprint(f"مؤشر كتلة الجسم: {bmi:.2f}")\nif bmi < 18.5:\n    print("الفئة: نقص في الوزن")\nelif bmi < 25:\n    print("الفئة: وزن طبيعي")\nelif bmi < 30:\n    print("الفئة: زيادة في الوزن")\nelse:\n    print("الفئة: سمنة")',{n1:'الاسم',n2:'الوزن (كغ)',n3:'الطول (متر)'},180)}
+${makePyEditorWithInputs('bmi','name = input("أدخل اسمك: ")\nweight = float(input("أدخل وزنك بالكيلو: "))\nheight = float(input("أدخل طولك بالمتر: "))\nbmi = weight / (height ** 2)\nprint("مرحباً", name)\nprint("مؤشر كتلة الجسم:", round(bmi, 2))\nif bmi < 18.5:\n    print("الفئة: نقص في الوزن")\nelif bmi < 25:\n    print("الفئة: وزن طبيعي")\nelif bmi < 30:\n    print("الفئة: زيادة في الوزن")\nelse:\n    print("الفئة: سمنة")',{n1:'الاسم',n2:'الوزن (كغ)',n3:'الطول (متر)'},180)}
 
-${makePyEditorWithInputs('currency','sar = float(input("أدخل المبلغ بالريال: "))\nrate = 3.75\nusd = sar / rate\nprint(f"{sar} ريال = {usd:.2f} دولار")',{n1:'المبلغ بالريال'},80)}
+${makePyEditorWithInputs('currency','sar = float(input("أدخل المبلغ بالريال: "))\nrate = 3.75\nusd = sar / rate\nprint(sar, "ريال =", round(usd, 2), "دولار")',{n1:'المبلغ بالريال'},80)}
 </div>`;
 
 
@@ -1041,26 +1133,7 @@ S.t7=`<div class="card">
 هذا محاكي بسيط يدعم: print, input, المتغيرات, العمليات الحسابية, القوائم, الصفوف, if/else, for, while, الدوال, f-strings والمزيد.
 </div>
 
-${makePyEditor('free',`# اكتب كودك هنا وجرّب!
-# مثال: حاسبة المعدل
-grades = [85, 92, 78, 96, 88]
-total = sum(grades)
-count = len(grades)
-average = total / count
-
-print("الدرجات:", grades)
-print(f"المجموع: {total}")
-print(f"عدد المواد: {count}")
-print(f"المعدل: {average:.2f}")
-
-if average >= 90:
-    print("تقدير: ممتاز! 🌟")
-elif average >= 80:
-    print("تقدير: جيد جداً 👍")
-elif average >= 70:
-    print("تقدير: جيد")
-else:
-    print("تقدير: مقبول")`,300)}
+${makePyEditor('free','# اكتب كودك هنا وجرّب!\n# مثال: حاسبة المعدل\ngrades = [85, 92, 78, 96, 88]\ntotal = sum(grades)\ncount = len(grades)\naverage = total / count\n\nprint("الدرجات:", grades)\nprint("المجموع:", total)\nprint("عدد المواد:", count)\nprint("المعدل:", round(average, 2))\n\nif average >= 90:\n    print("تقدير: ممتاز!")\nelif average >= 80:\n    print("تقدير: جيد جداً")\nelif average >= 70:\n    print("تقدير: جيد")\nelse:\n    print("تقدير: مقبول")',300)}
 
 <h3>💡 أمثلة جاهزة للتجربة</h3>
 <div class="btn-row">
