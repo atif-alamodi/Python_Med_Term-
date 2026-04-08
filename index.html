@@ -286,8 +286,9 @@ function evalExpr(expr){
   }}
 
 
-  // Indexing: obj[idx] - only if [ is preceded by identifier/]/}/)
-  {var id2=0;
+  // Indexing: obj[idx] - only when ] is at end of expression
+  if(expr[expr.length-1]===']'){
+  var id2=0;
   for(var j=expr.length-1;j>=0;j--){
     if(expr[j]===']')id2++;
     if(expr[j]==='['){id2--;if(id2===0&&j>0&&/[\w\]\)\}]/.test(expr[j-1])){
@@ -495,6 +496,16 @@ function execBlock(lines,startI){
     var line=lines[i];
     var trimmed=line.replace(/^\s+/,'');
     if(trimmed===''||trimmed[0]==='#'){i++;continue;}
+    // Strip inline comments (# not inside strings)
+    var cStrip=false,cStripQ='',cStripIdx=-1;
+    for(var ci=0;ci<trimmed.length;ci++){
+      var cc=trimmed[ci];
+      if(!cStrip&&(cc==='"'||cc==="'")){cStrip=true;cStripQ=cc;continue;}
+      if(cStrip&&cc===cStripQ){cStrip=false;continue;}
+      if(!cStrip&&cc==='#'){cStripIdx=ci;break;}
+    }
+    if(cStripIdx>0)trimmed=trimmed.slice(0,cStripIdx).trim();
+    if(trimmed===''){i++;continue;}
 
     // def
     if(trimmed.indexOf('def ')===0){
